@@ -1,67 +1,51 @@
-'use strict';
+"use strict";
 
-var gpool        = require('generic-pool'),
-    kafka_config = require('../config/kafka'),
+var kafka_config = require('../config/kafka'),
+    kafka        = require('kafka-node'),
     models       = require('./models'),
-    memory       = require('sails-memory')
+    memory       = require('sails-memory'),
+    spawn        = require('../utils/spawn'),
+    Producer     = kafka.Producer,
+    Client       = kafka.Client,
+    Consumer     = kafka.Consumer
 ;
 
 class UserAccountStore {
 
     constructor () {
-        this.kafkaPool = gpool.Pool({
-            name     : 'kafka',
-            create   : function(callback) {
-                
-                callback(null, null);
-            },
-            destroy  : function(client) { 
 
-            },
-            max      : 10,
-            min      : 1, 
-            idleTimeoutMillis : 30000,
-            log : false 
+        var that = this; // Sorry can't bind this to a generator
+        spawn(function* () {
+            let host  = yield kafka_config.zk();
+            let port  = yield kafka_config.port();
+            that.topic = yield kafka_config.topic();
+            that.producer = yield that.connectToKafka(host, port);
+
+            let config = {
+              adapters: {
+                'default': memory,
+                 memory: memory
+              },
+              connections: {
+                memory: {
+                  adapter: 'memory'
+                }
+              },
+              defaults: {
+                migrate: 'alter'
+              }
+            };
+
+            that.models = yield that.initModels(config);
+
+            return;
+        }())
+        .then((a) => {
+            console.log("Finished Store Setup");
+        })
+        .catch((e) => {
+            console.log("ERROR", e)
         });
-
-        this.kafkaPool.drain(function() {
-            this.kafkaPool.destroyAllNow();
-        }.bind(this));
-
-        // Build A Config Object
-        var config = {
-
-          // Setup Adapters
-          // Creates named adapters that have have been required
-          adapters: {
-            'default': memory,
-             memory: memory
-          },
-
-          // Build Connections Config
-          // Setup connections using the named adapter configs
-          connections: {
-            memory: {
-              adapter: 'memory'
-            }
-
-            // myLocalMySql: {
-            //   adapter: 'mysql',
-            //   host: 'localhost',
-            //   database: 'foobar'
-            // }
-          },
-
-          defaults: {
-            migrate: 'alter'
-          }
-
-        };
-
-        models.initialize(config, function (err, models) {
-            console.log('Datastore Ready');
-            this.models = models.collections;
-        }.bind(this));
 
         // I can just store these in memory because the only reason I'd use
         // redis is for a performant K/V store thats accessible by multiple
@@ -72,6 +56,29 @@ class UserAccountStore {
         // **don't quote me just yet, I'll probably end up using memcached
         this.sessionTokens = { };
 
+    }
+  
+
+    initModels (config) {
+        return new Promise((accept, reject) => {
+            models.initialize(config, function (err, models) {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                accept(models.collections);
+            });
+        });
+    }
+
+    connectToKafka(host, port) {
+        return new Promise((accept, reject) => {
+            var producer = new Producer(new Client(host + ":" + port))
+            producer.on('ready', () => {
+                accept(producer);    
+            });
+            producer.on('error', reject);
+        });
     }
 
     checkCachedSession (token, referer) {
