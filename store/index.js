@@ -1,12 +1,14 @@
 'use strict';
 
 var gpool        = require('generic-pool'),
-    kafka_config = require('../config/kafka')
+    kafka_config = require('../config/kafka'),
+    models       = require('./models'),
+    memory       = require('sails-memory')
 ;
 
 class UserAccountStore {
 
-    constructor() {
+    constructor () {
         this.kafkaPool = gpool.Pool({
             name     : 'kafka',
             create   : function(callback) {
@@ -26,6 +28,41 @@ class UserAccountStore {
             this.kafkaPool.destroyAllNow();
         }.bind(this));
 
+        // Build A Config Object
+        var config = {
+
+          // Setup Adapters
+          // Creates named adapters that have have been required
+          adapters: {
+            'default': memory,
+             memory: memory
+          },
+
+          // Build Connections Config
+          // Setup connections using the named adapter configs
+          connections: {
+            memory: {
+              adapter: 'memory'
+            }
+
+            // myLocalMySql: {
+            //   adapter: 'mysql',
+            //   host: 'localhost',
+            //   database: 'foobar'
+            // }
+          },
+
+          defaults: {
+            migrate: 'alter'
+          }
+
+        };
+
+        models.initialize(config, function (err, models) {
+            console.log('Datastore Ready');
+            this.models = models.collections;
+        }.bind(this));
+
         // I can just store these in memory because the only reason I'd use
         // redis is for a performant K/V store thats accessible by multiple
         // clients. This will only ever be accessed localy by this process
@@ -37,12 +74,12 @@ class UserAccountStore {
 
     }
 
-    checkCachedSession(token, referer) {
+    checkCachedSession (token, referer) {
         // Yeah you be good
         return (token in this.sessionTokens);
     }
 
-    ask(req) {
+    ask (req) {
         return new Promise(function (accept, reject) {
             let headers = req.headers;
             // Assert Token Exists
@@ -54,7 +91,7 @@ class UserAccountStore {
                 return;
             }
 
-            // Asset Token Session is Valid, check redis
+            // Assert Token Session is Valid
             let token = headers['token'];
             if (this.checkCachedSession(token, null)) {
                 accept();
@@ -68,7 +105,26 @@ class UserAccountStore {
         }.bind(this));
     }
 
-
+    auth (user, pass) {
+        return new Promise(function (accept, reject) {
+            this.models.user.findOne()
+            .where({
+                username: user
+            })
+            .then(function (err, user) {
+                if (err) {
+                    reject(err);
+                } if (user) {
+                    accept("var-token");
+                } else {
+                    let error = new Error('User Error');
+                    error.status = 404;
+                    error.message = "User not found in the system";
+                    reject(error);
+                }
+            });
+        }.bind(this));
+    }
 
 }
 

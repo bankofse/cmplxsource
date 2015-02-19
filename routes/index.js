@@ -17,13 +17,25 @@ router.get('/', function(req, res, next) {
   });
 });
 
-router.post('/', function (req, res) {
-
-
-
-  res.send({});
+router.post('/', function (req, res, next) {
+  if (req.body.user && req.body.pass) {
+    req.accountstore.auth(req.body.user, req.body.pass)
+    .then((token) => {
+      res.send({
+        token: token
+      });  
+    })
+    .catch((e) => {
+      console.log(e);
+      next(e);
+    });
+  } else {
+    let error = new Error('Auth Error');
+    error.status = 400;
+    error.message = "Not enough parameters provided";
+    next(error);
+  }
+  
 });
-
-
 
 module.exports = router;

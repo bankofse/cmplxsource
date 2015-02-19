@@ -1,18 +1,22 @@
 'use strict';
 
 var Waterline = require('waterline'),
-    bcrypt    = require('bcrypt');
+    bcrypt    = require('bcrypt')
+;
+
+var orm = new Waterline();
 
 var User = Waterline.Collection.extend({
 
   identity: 'user',
-  connection: 'local-postgresql',
+  connection: 'memory',
 
   attributes: {
 
     username: {
       type: 'string',
-      required: true
+      required: true,
+      unique: true
     },
 
     password: {
@@ -34,6 +38,6 @@ var User = Waterline.Collection.extend({
   }
 });
 
-module.exports = {
-	User : User
-}
+orm.loadCollection(User);
+
+module.exports = orm;
