@@ -1,88 +1,71 @@
 'use strict';
 
 var gpool        = require('generic-pool'),
-    mysql        = require('mysql'),
-    kafka_config = require('../config/kafka'),
-    User         = require('./models')
+    kafka_config = require('../config/kafka')
 ;
-
-var kafkaPool = gpool.Pool({
-    name     : 'kafka',
-    create   : function(callback) {
-        
-        callback(null, null);
-    },
-    destroy  : function(client) { 
-
-    },
-    max      : 10,
-    min      : 1, 
-    idleTimeoutMillis : 30000,
-    log : false 
-});
-
-kafkaPool.drain(function() {
-    kafkaPool.destroyAllNow();
-});
-
-// var mysqlPool = gpool.Pool({
-//     name     : 'kafka',
-//     create   : function(callback) {
-//         let host = process.env.MYSQL_PORT_3306_TCP_ADDR;
-//         let port = process.env.MYSQL_PORT_3306_TCP_PORT;
-        
-//         let connection = mysql.createConnection({
-//             host: host,
-//             port: port,
-//             user: 'root',
-//             password: 'alpine'
-//         });
-
-//         connection.connect((err)=> {
-//             if (err) {
-//                 console.error('error connecting: ' + err.stack);
-//                 callback(err);
-//                 return;
-//             }
-//             callback(null, connection);
-//         });
-//     },
-//     destroy  : function(client) { 
-//         client.end();
-//     },
-//     max      : 10,
-//     min      : 1, 
-//     idleTimeoutMillis : 30000,
-//     log : false 
-// });
-
-// mysqlPool.drain(function() {
-//     mysqlPool.destroyAllNow();
-// });
 
 class UserAccountStore {
 
     constructor() {
-        
-    }
+        this.kafkaPool = gpool.Pool({
+            name     : 'kafka',
+            create   : function(callback) {
+                
+                callback(null, null);
+            },
+            destroy  : function(client) { 
 
-    init() {
-        return new Promise(function (accept, reject) {
-            var client
-            mysqlPool.acquire((err, c) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    this.client = c;
-                    accept();
-                }
-            });
+            },
+            max      : 10,
+            min      : 1, 
+            idleTimeoutMillis : 30000,
+            log : false 
+        });
+
+        this.kafkaPool.drain(function() {
+            this.kafkaPool.destroyAllNow();
         }.bind(this));
+
+        // I can just store these in memory because the only reason I'd use
+        // redis is for a performant K/V store thats accessible by multiple
+        // clients. This will only ever be accessed localy by this process
+        // and updated by the kafka replication stream. So this is more 
+        // performant**
+        //
+        // **don't quote me just yet, I'll probably end up using memcached
+        this.sessionTokens = { };
+
     }
 
-    destroy() {
-        mysqlPool.release(this.client);
+    checkCachedSession(token, referer) {
+        // Yeah you be good
+        return (token in this.sessionTokens);
+    }
+
+    ask(req) {
+        return new Promise(function (accept, reject) {
+            let headers = req.headers;
+            // Assert Token Exists
+            if (headers['token'] === undefined) {
+                let error = new Error('Token Error');
+                error.status = 400;
+                error.message = "Token was not found in headers";
+                reject(error);
+                return;
+            }
+
+            // Asset Token Session is Valid, check redis
+            let token = headers['token'];
+            if (this.checkCachedSession(token, null)) {
+                accept();
+            } else {
+                let error = new Error('Token Error');
+                error.status = 401;
+                error.message = "Token was invalid or origin was incorrect";
+                reject(error);
+                return;
+            }
+        }.bind(this));
     }
 
 

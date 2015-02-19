@@ -1,30 +1,29 @@
 "use strict";
 
 var express = require('express'),
-    router = express.Router(),
-    Store  = require('../store')
+    router = express.Router()
 ;
 
 /* GET home page. */
-router.get('/', function(req, res) {
-  let accounts = new Store();
-
-  accounts
-  .init()
-  .then(()=> {
-    console.log("Store ready for use");
+router.get('/', function(req, res, next) {
+  req.accountstore.ask(req)
+  .then(() => {
+    res.send({
+      status: 200
+    });
+  })
+  .catch((e) => {
+    next(e);
   });
-
-  res.send({});
-
 });
 
-router.post('/create', function (req, res) {
+router.post('/', function (req, res) {
 
 
 
   res.send({});
 });
+
 
 
 module.exports = router;

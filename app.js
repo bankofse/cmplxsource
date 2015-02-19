@@ -6,14 +6,17 @@ var express      = require('express'),
 ;
 
 var routes = require('./routes/index'),
-    models = require('./store/models')
+    Store  = require('./store')
 ;
 
-models.sync().then(() => {
-    console.log("Good?")
-});
-
 var app = express();
+
+var accountstore = new Store()
+
+app.use((req, res, next) => {
+    req.accountstore = accountstore;
+    next();
+});
 
 app.use(logger('dev'));
 app.use(bodyParser.json());

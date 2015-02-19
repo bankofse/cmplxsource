@@ -1,0 +1,1 @@
+curl -XPUT -H "Content-Type: application/json" "http://localhost:8500/v1/agent/service/register" -d "{\"ID\":\"zk\",\"Name\":\"zk\",\"Tags\":[\"master\"],\"Port\":$( docker port zk | awk -F ':' '{print $2}' )}"

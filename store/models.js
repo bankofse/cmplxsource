@@ -1,20 +1,39 @@
 'use strict';
 
-var Sequelize = require('sequelize');
+var Waterline = require('waterline'),
+    bcrypt    = require('bcrypt');
 
-var database   = 'user_auth'
-var connection = process.env.POSTGRES_PORT_5432_TCP.replace('tcp', 'postgre');
-var connectionString = connection + '/' + database;
+var User = Waterline.Collection.extend({
 
-console.log(env);
+  identity: 'user',
+  connection: 'local-postgresql',
 
-var seq = new Sequelize(connectionString, options);
+  attributes: {
 
-console.log(seq)
+    username: {
+      type: 'string',
+      required: true
+    },
 
-var User = seq.define('User', {
-  username: Sequelize.STRING,
-  birthday: Sequelize.DATE
+    password: {
+      type: 'string',
+      minLength: 6,
+      required: true,
+      columnName: 'encrypted_password'
+    }
+
+  },
+
+  // Lifecycle Callbacks
+  beforeCreate: function(values, next) {
+    bcrypt.hash(values.password, 10, function(err, hash) {
+      if(err) return next(err);
+      values.password = hash;
+      next();
+    });
+  }
 });
 
-module.exports = seq;
+module.exports = {
+	User : User
+}
