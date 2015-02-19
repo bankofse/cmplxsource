@@ -2,9 +2,16 @@ var express      = require('express'),
     path         = require('path'),
     logger       = require('morgan'),
     cookieParser = require('cookie-parser'),
-    bodyParser   = require('body-parser');
+    bodyParser   = require('body-parser')
+;
 
-var routes = require('./routes/index');
+var routes = require('./routes/index'),
+    models = require('./store/models')
+;
+
+models.sync().then(() => {
+    console.log("Good?")
+});
 
 var app = express();
 

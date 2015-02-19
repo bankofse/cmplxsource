@@ -2,11 +2,19 @@
 
 var Sequelize = require('sequelize');
 
-let host = process.env.MYSQL_PORT_3306_TCP_ADDR;
-let port = process.env.MYSQL_PORT_3306_TCP_PORT;
-var seq = new Sequelize('mysql://' + host + ':' + port + '/app_users', 'root', 'alpine');
+var database   = 'user_auth'
+var connection = process.env.POSTGRES_PORT_5432_TCP.replace('tcp', 'postgre');
+var connectionString = connection + '/' + database;
 
+console.log(env);
 
+var seq = new Sequelize(connectionString, options);
+
+console.log(seq)
+
+var User = seq.define('User', {
+  username: Sequelize.STRING,
+  birthday: Sequelize.DATE
+});
 
 module.exports = seq;
-
