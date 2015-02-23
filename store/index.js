@@ -8,7 +8,7 @@ var kafka_config = require('../config/kafka'),
     bcrypt       = require('bcrypt'),
     Producer     = kafka.Producer,
     Client       = kafka.Client,
-    Consumer     = kafka.Consumer
+    Consumer     = kafka.HighLevelConsumer
 ;
 
 class UserAccountStore {
@@ -25,12 +25,6 @@ class UserAccountStore {
             let client = new Client(host + ":" + port);
             this.producer = yield this.connectToKafka(client, this.topic);
             console.log('Kafka set to publish to ' + this.topic);
-
-            console.log('Sending verification payload');
-            yield this.sendPayload(JSON.stringify({
-                        "version": "v0.1a",
-                        "type": "heartbeat"
-                    }));
 
             this.consumer = yield this.connectConsumer(client, this.topic);
 
@@ -57,6 +51,7 @@ class UserAccountStore {
         .then(function (a) {
             console.log("==== Finished Setup ====");
             this.consumer.on('message', this.recievedDataChangeEvent.bind(this));
+            
         }.bind(this))
         .catch((e) => {
             console.log("ERROR", e)
@@ -74,8 +69,8 @@ class UserAccountStore {
     }
 
     recievedDataChangeEvent (msg) {
+        console.log(msg);
         let message = JSON.parse(msg.value);
-        console.log(message);
         switch (message.version) {
             case "v0.1a":
                 switch (message.type) {
@@ -158,10 +153,10 @@ class UserAccountStore {
             producer.on('ready', () => {
                 console.log("Creating topic if not exists =>", topic);
                 producer.createTopics([topic], false, (err, data) => {
-                    console.log(arguments)
                     if (err) {
                         reject(err);
                     } else {
+                        console.log("->",data);
                         accept(producer);
                     }
                 });
@@ -175,8 +170,9 @@ class UserAccountStore {
             var consumer = new Consumer(client,
                 [
                     { 
-                        topic: topic, 
-                        offset: 0,
+                        topic: topic,
+                        partition: 0,
+                        offset: 0
                     }
                 ],
                 {
