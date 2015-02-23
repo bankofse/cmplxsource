@@ -26,7 +26,6 @@ router.post('/', function (req, res, next) {
       });  
     })
     .catch((e) => {
-      console.log(e);
       next(e);
     });
   } else {
@@ -38,10 +37,20 @@ router.post('/', function (req, res, next) {
 });
 
 router.post('/create', function (req, res, next) {
-
-  req.accountstore.createAccountRequest("7imbrook", "mypass");
-
-  res.send({});
+  if (req.body.user && req.body.pass) {
+    req.accountstore.createAccountRequest(req.body.user, req.body.pass)
+    .then((token) => {
+      res.send({
+        token: token
+      });
+    })
+    .catch(() => {
+      let error = new Error('Auth Error');
+      error.status = 500;
+      error.message = "Failed to create account";
+      next(error);
+    });
+  }
 });
 
 

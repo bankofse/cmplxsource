@@ -8,7 +8,8 @@ var kafka_config = require('../config/kafka'),
     bcrypt       = require('bcrypt'),
     Producer     = kafka.Producer,
     Client       = kafka.Client,
-    Consumer     = kafka.Consumer
+    Consumer     = kafka.Consumer,
+    EventConsumer = require('./storeWriter')
 ;
 
 class UserAccountStore {
@@ -21,12 +22,12 @@ class UserAccountStore {
             let host  = yield kafka_config.zk();
             let port  = yield kafka_config.port();
             console.log("Zookeeper discovered at " + host + ":" + port);
-            this.topic = yield kafka_config.topic();
+            let topic = yield kafka_config.topic();
             let client = new Client(host + ":" + port);
-            this.producer = yield this.connectToKafka(client, this.topic);
-            console.log('Kafka set to publish to ' + this.topic);
+            let producer = yield this.connectToKafka(client, topic);
+            console.log('Kafka set to publish to ' + topic);
 
-            this.consumer = yield this.connectConsumer(client, this.topic);
+            let consumer = yield this.connectConsumer(client, topic);
 
             let config = {
               adapters: {
@@ -46,12 +47,12 @@ class UserAccountStore {
             this.models = yield this.initModels(config);
             console.log("Finished models config");
 
+            let eventConsumer = new EventConsumer(producer, consumer, topic, this.models);
+
             return;
         }.bind(this)())
         .then(function (a) {
-            console.log("==== Finished Setup ====");
-            this.consumer.on('message', this.recievedDataChangeEvent.bind(this));
-            
+            console.log("==== Finished Setup ====");            
         }.bind(this))
         .catch((e) => {
             console.log("ERROR", e)
@@ -68,71 +69,19 @@ class UserAccountStore {
 
     }
 
-    recievedDataChangeEvent (msg) {
-        console.log(msg);
-        let message = JSON.parse(msg.value);
-        switch (message.version) {
-            case "v0.1a":
-                switch (message.type) {
-                    case "creation":
-                        this.createAccount(message.payload);
-            }
-        }
-    }
-
-    createAccount (payload) {
-        this.models.user.create({
-            username: payload.user,
-            password: payload.pass    
-        })
-        .exec((err) => {
-            if (err) {
-                console.log("account already made");
-            } else {
-                console.log("account created");
-            }
-        });
-    }
-
-    buildAccountCreationMessage (user, pass) {
-        return new Promise ((accept, reject) => {
-            bcrypt.hash(pass, 10, function(err, hash) {
-                console
-                if(err) return reject(err);
-                else 
-                {
-                   accept(JSON.stringify({
-                        "version": "v0.1a",
-                        "creationDate": (new Date()).toISOString(),
-                        "type": "creation",
-                        "payload": {
-                            "user": user,
-                            "pass": hash
-                        }
-                    }));
-                }
-            });
-        });
-    }
-
-    sendPayload (msg) {
-        var producer = this.producer;
-        var topic = this.topic;
-        return new Promise((accept, reject) => {
-            producer.send([{
-                topic: topic,
-                messages: msg
-            }], accept);
-        });
+    hashPass (pass, done) {
+        bcrypt.hash(pass, 10, done);
     }
 
     createAccountRequest (user, pass) {
         // Check validation
-        this.buildAccountCreationMessage(user, pass)
-        .then(this.sendPayload.bind(this))
-        .catch((err) =>{
-            console.log("err", err);
-        });
+        return this.eventConsumer.buildAccountCreationMessage(user, pass)
+                .then(this.eventConsumer.sendPayload.bind(this))
+                .then(() => {
+                    return new Promise((accept, reject) => {
+                        accept("token")
+                    });
+                });
     }
 
     initModels (config) {
@@ -171,8 +120,7 @@ class UserAccountStore {
                 [
                     { 
                         topic: topic,
-                        partition: 0,
-                        offset: 0
+                        partition: 0
                     }
                 ],
                 {
@@ -219,11 +167,19 @@ class UserAccountStore {
             .where({
                 username: user
             })
-            .then(function (err, user) {
-                if (err) {
-                    reject(err);
-                } if (user) {
-                    accept("var-token");
+            .then(function (user) {
+                if (user) {
+                    bcrypt.compare(pass, user.password, (err, res) => {
+                        if (err) reject(err);
+                        if (res) {
+                            accept("New Token");
+                        } else {
+                            let error = new Error('User Error');
+                            error.status = 401;
+                            error.message = "Invalid Password";
+                            reject(error);
+                        }
+                    });
                 } else {
                     let error = new Error('User Error');
                     error.status = 404;
