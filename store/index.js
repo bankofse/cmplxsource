@@ -5,6 +5,7 @@ var kafka_config = require('../config/kafka'),
     models       = require('./models'),
     memory       = require('sails-memory'),
     spawn        = require('../utils/spawn'),
+    bcrypt       = require('bcrypt'),
     Producer     = kafka.Producer,
     Client       = kafka.Client,
     Consumer     = kafka.Consumer
@@ -14,12 +15,14 @@ class UserAccountStore {
 
     constructor () {
 
-        var that = this; // Sorry can't bind this to a generator
         spawn(function* () {
             let host  = yield kafka_config.zk();
             let port  = yield kafka_config.port();
-            that.topic = yield kafka_config.topic();
-            that.producer = yield that.connectToKafka(host, port);
+            this.topic = yield kafka_config.topic();
+            let client = new Client(host + ":" + port);
+            this.producer = yield this.connectToKafka(client);
+            console.log('Kafka set to publish to ' + this.topic);
+            this.consumer = yield this.connectConsumer(client, this.topic);
 
             let config = {
               adapters: {
@@ -36,13 +39,14 @@ class UserAccountStore {
               }
             };
 
-            that.models = yield that.initModels(config);
+            this.models = yield this.initModels(config);
 
             return;
-        }())
-        .then((a) => {
+        }.bind(this)())
+        .then(function (a) {
             console.log("Finished Store Setup");
-        })
+            this.consumer.on('message', this.recievedDataChangeEvent.bind(this))
+        }.bind(this))
         .catch((e) => {
             console.log("ERROR", e)
         });
@@ -57,7 +61,69 @@ class UserAccountStore {
         this.sessionTokens = { };
 
     }
-  
+
+    recievedDataChangeEvent (msg) {
+        let message = JSON.parse(msg.value);
+        switch (message.version) {
+            case "v0.1a":
+                switch (message.type) {
+                    case "creation":
+                        this.createAccount(message.payload);
+            }
+        }
+    }
+
+    createAccount(payload) {
+        this.models.user.create({
+            username: payload.user,
+            password: payload.pass    
+        })
+        .exec((err) => {
+            if (err) {
+                console.log("account already made");
+            } else {
+                console.log("account created");
+            }
+        });
+    }
+
+    buildAccountCreationMessage(user, pass) {
+        return new Promise ((accept, reject) => {
+            bcrypt.hash(pass, 10, function(err, hash) {
+                if(err) return reject(err);
+                else 
+                {
+                   accept(JSON.stringify({
+                        "version": "v0.1a",
+                        "creationDate": (new Date()).toISOString(),
+                        "type": "creation",
+                        "payload": {
+                            "user": user,
+                            "pass": hash
+                        }
+                    }));
+                }
+            });
+        });
+    }
+
+    createAccountRequest(user, pass) {
+        // Check validation
+        var producer = this.producer;
+        var topic = this.topic;
+        this.buildAccountCreationMessage(user, pass)
+        .then((msg) => {
+            producer.send([{
+                topic: topic,
+                messages: msg
+            }], () => {
+                console.log("Sent");
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+    }
 
     initModels (config) {
         return new Promise((accept, reject) => {
@@ -71,13 +137,26 @@ class UserAccountStore {
         });
     }
 
-    connectToKafka(host, port) {
+    connectToKafka (client) {
         return new Promise((accept, reject) => {
-            var producer = new Producer(new Client(host + ":" + port))
+            var producer = new Producer(client)
             producer.on('ready', () => {
                 accept(producer);    
             });
             producer.on('error', reject);
+        });
+    }
+
+    connectConsumer (client, topic) {
+        return new Promise((accept, reject) => {
+            var consumer = new Consumer(client,
+                [
+                    { topic: topic, partition: 0 }
+                ],
+                {
+                    autoCommit: false
+                });
+            accept(consumer);
         });
     }
 

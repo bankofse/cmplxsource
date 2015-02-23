@@ -1,7 +1,6 @@
 'use strict';
 
-var Waterline = require('waterline'),
-    bcrypt    = require('bcrypt')
+var Waterline = require('waterline')
 ;
 
 var orm = new Waterline();
@@ -28,14 +27,7 @@ var User = Waterline.Collection.extend({
 
   },
 
-  // Lifecycle Callbacks
-  beforeCreate: function(values, next) {
-    bcrypt.hash(values.password, 10, function(err, hash) {
-      if(err) return next(err);
-      values.password = hash;
-      next();
-    });
-  }
+
 });
 
 orm.loadCollection(User);

@@ -35,7 +35,14 @@ router.post('/', function (req, res, next) {
     error.message = "Not enough parameters provided";
     next(error);
   }
-  
 });
+
+router.post('/create', function (req, res, next) {
+
+  req.accountstore.createAccountRequest("7imbrook", "mypass");
+
+  res.send({});
+});
+
 
 module.exports = router;
