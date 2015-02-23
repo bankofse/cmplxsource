@@ -8,7 +8,7 @@ var kafka_config = require('../config/kafka'),
     bcrypt       = require('bcrypt'),
     Producer     = kafka.Producer,
     Client       = kafka.Client,
-    Consumer     = kafka.HighLevelConsumer
+    Consumer     = kafka.Consumer
 ;
 
 class UserAccountStore {
