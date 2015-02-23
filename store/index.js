@@ -23,7 +23,7 @@ class UserAccountStore {
             console.log("Zookeeper discovered at " + host + ":" + port);
             this.topic = yield kafka_config.topic();
             let client = new Client(host + ":" + port);
-            this.producer = yield this.connectToKafka(client);
+            this.producer = yield this.connectToKafka(client, this.topic);
             console.log('Kafka set to publish to ' + this.topic);
 
             console.log('Sending verification payload');
@@ -127,9 +127,7 @@ class UserAccountStore {
             producer.send([{
                 topic: topic,
                 messages: msg
-            }], () => {
-                accept()
-            });
+            }], accept);
         });
     }
 
@@ -154,11 +152,19 @@ class UserAccountStore {
         });
     }
 
-    connectToKafka (client) {
+    connectToKafka (client, topic) {
         return new Promise((accept, reject) => {
             var producer = new Producer(client)
             producer.on('ready', () => {
-                accept(producer);    
+                console.log("Creating topic if not exists =>", topic);
+                producer.createTopics([topic], false, (err, data) => {
+                    console.log(arguments)
+                    if (err) {
+                        reject(err);
+                    } else {
+                        accept(producer);
+                    }
+                });
             });
             producer.on('error', reject);
         });
@@ -168,7 +174,10 @@ class UserAccountStore {
         return new Promise((accept, reject) => {
             var consumer = new Consumer(client,
                 [
-                    { topic: topic, partition: 0 }
+                    { 
+                        topic: topic, 
+                        offset: 0,
+                    }
                 ],
                 {
                     autoCommit: false
