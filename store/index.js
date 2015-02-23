@@ -15,13 +15,23 @@ class UserAccountStore {
 
     constructor () {
 
+        console.log("==== Setting Up UserAccountStore ====");
+
         spawn(function* () {
             let host  = yield kafka_config.zk();
             let port  = yield kafka_config.port();
+            console.log("Zookeeper discovered at " + host + ":" + port);
             this.topic = yield kafka_config.topic();
             let client = new Client(host + ":" + port);
             this.producer = yield this.connectToKafka(client);
             console.log('Kafka set to publish to ' + this.topic);
+
+            console.log('Sending verification payload');
+            yield this.sendPayload(JSON.stringify({
+                        "version": "v0.1a",
+                        "type": "heartbeat"
+                    }));
+
             this.consumer = yield this.connectConsumer(client, this.topic);
 
             let config = {
@@ -40,12 +50,13 @@ class UserAccountStore {
             };
 
             this.models = yield this.initModels(config);
+            console.log("Finished models config");
 
             return;
         }.bind(this)())
         .then(function (a) {
-            console.log("Finished Store Setup");
-            this.consumer.on('message', this.recievedDataChangeEvent.bind(this))
+            console.log("==== Finished Setup ====");
+            this.consumer.on('message', this.recievedDataChangeEvent.bind(this));
         }.bind(this))
         .catch((e) => {
             console.log("ERROR", e)
@@ -64,6 +75,7 @@ class UserAccountStore {
 
     recievedDataChangeEvent (msg) {
         let message = JSON.parse(msg.value);
+        console.log(message);
         switch (message.version) {
             case "v0.1a":
                 switch (message.type) {
@@ -73,7 +85,7 @@ class UserAccountStore {
         }
     }
 
-    createAccount(payload) {
+    createAccount (payload) {
         this.models.user.create({
             username: payload.user,
             password: payload.pass    
@@ -87,9 +99,10 @@ class UserAccountStore {
         });
     }
 
-    buildAccountCreationMessage(user, pass) {
+    buildAccountCreationMessage (user, pass) {
         return new Promise ((accept, reject) => {
             bcrypt.hash(pass, 10, function(err, hash) {
+                console
                 if(err) return reject(err);
                 else 
                 {
@@ -107,21 +120,25 @@ class UserAccountStore {
         });
     }
 
-    createAccountRequest(user, pass) {
-        // Check validation
+    sendPayload (msg) {
         var producer = this.producer;
         var topic = this.topic;
-        this.buildAccountCreationMessage(user, pass)
-        .then((msg) => {
+        return new Promise((accept, reject) => {
             producer.send([{
                 topic: topic,
                 messages: msg
             }], () => {
-                console.log("Sent");
+                accept()
             });
-        })
-        .catch((err) => {
-            console.log(err);
+        });
+    }
+
+    createAccountRequest (user, pass) {
+        // Check validation
+        this.buildAccountCreationMessage(user, pass)
+        .then(this.sendPayload.bind(this))
+        .catch((err) =>{
+            console.log("err", err);
         });
     }
 
