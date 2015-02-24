@@ -15,124 +15,30 @@ var kafka_config = require('../config/kafka'),
 class UserAccountStore {
 
     constructor () {
-
         console.log("==== Setting Up UserAccountStore ====");
+        
+        this.eventConsumer = new EventConsumer();
 
-        spawn(function* () {
-            let host  = yield kafka_config.zk();
-            let port  = yield kafka_config.port();
-            console.log("Zookeeper discovered at " + host + ":" + port);
-            let topic = yield kafka_config.topic();
-            let client = new Client(host + ":" + port);
-            let producer = yield this.connectToKafka(client, topic);
-            console.log('Kafka set to publish to ' + topic);
-
-            let consumer = yield this.connectConsumer(client, topic);
-
-            let config = {
-              adapters: {
-                'default': memory,
-                 memory: memory
-              },
-              connections: {
-                memory: {
-                  adapter: 'memory'
-                }
-              },
-              defaults: {
-                migrate: 'alter'
-              }
-            };
-
-            this.models = yield this.initModels(config);
-            console.log("Finished models config");
-
-            let eventConsumer = new EventConsumer(producer, consumer, topic, this.models);
-
-            return;
-        }.bind(this)())
-        .then(function (a) {
+        this.eventConsumer.setup()
+        .then(() => {
             console.log("==== Finished Setup ====");            
-        }.bind(this))
+        })
         .catch((e) => {
             console.log("ERROR", e)
         });
-
-        // I can just store these in memory because the only reason I'd use
-        // redis is for a performant K/V store thats accessible by multiple
-        // clients. This will only ever be accessed localy by this process
-        // and updated by the kafka replication stream. So this is more 
-        // performant**
-        //
-        // **don't quote me just yet, I'll probably end up using memcached
-        this.sessionTokens = { };
-
-    }
-
-    hashPass (pass, done) {
-        bcrypt.hash(pass, 10, done);
     }
 
     createAccountRequest (user, pass) {
         // Check validation
-        return this.eventConsumer.buildAccountCreationMessage(user, pass)
-                .then(this.eventConsumer.sendPayload.bind(this))
-                .then(() => {
-                    return new Promise((accept, reject) => {
-                        accept("token")
-                    });
-                });
-    }
+        return spawn(function* () {
 
-    initModels (config) {
-        return new Promise((accept, reject) => {
-            models.initialize(config, function (err, models) {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                accept(models.collections);
-            });
-        });
-    }
+            let creationMessage = yield this.eventConsumer.buildAccountCreationMessage(user, pass);
 
-    connectToKafka (client, topic) {
-        return new Promise((accept, reject) => {
-            var producer = new Producer(client)
-            producer.on('ready', () => {
-                console.log("Creating topic if not exists =>", topic);
-                producer.createTopics([topic], false, (err, data) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        console.log("->",data);
-                        accept(producer);
-                    }
-                });
-            });
-            producer.on('error', reject);
-        });
-    }
+            yield this.eventConsumer.sendPayload(creationMessage);
 
-    connectConsumer (client, topic) {
-        return new Promise((accept, reject) => {
-            var consumer = new Consumer(client,
-                [
-                    { 
-                        topic: topic,
-                        partition: 0
-                    }
-                ],
-                {
-                    autoCommit: false
-                });
-            accept(consumer);
-        });
-    }
+            return "Token";
 
-    checkCachedSession (token, referer) {
-        // Yeah you be good
-        return (token in this.sessionTokens);
+        }.bind(this)());
     }
 
     ask (req) {
@@ -149,7 +55,7 @@ class UserAccountStore {
 
             // Assert Token Session is Valid
             let token = headers['token'];
-            if (this.checkCachedSession(token, null)) {
+            if (this.eventConsumer.checkCachedSession(token, null)) {
                 accept();
             } else {
                 let error = new Error('Token Error');
@@ -163,14 +69,17 @@ class UserAccountStore {
 
     auth (user, pass) {
         return new Promise(function (accept, reject) {
-            this.models.user.findOne()
+            this.eventConsumer.models.user.findOne()
             .where({
                 username: user
             })
             .then(function (user) {
                 if (user) {
                     bcrypt.compare(pass, user.password, (err, res) => {
-                        if (err) reject(err);
+                        if (err) {
+                            console.log(err);  
+                            reject(err);
+                        }
                         if (res) {
                             accept("New Token");
                         } else {

@@ -8,23 +8,81 @@ var kafka_config = require('../config/kafka'),
     bcrypt       = require('bcrypt'),
     Producer     = kafka.Producer,
     Client       = kafka.Client,
-    Consumer     = kafka.Consumer
+    Consumer     = kafka.Consumer,
+    Offset       = kafka.Offset
 ;
 
 class EventConsumer {
 
+    constructor () {
+        this.sessionTokens = { };
+        // Heath Monitoring
+        this.messagesRecieved = 0;
+        setInterval(this.checkoffset.bind(this), 5000);
+    }
 
-	constructor (producer, consumer, topic, models) {
-		this.producer = producer;
-		this.consumer = consumer;
-		this.topic = topic;
-		this.models = models;
+    setup () {
+        return spawn(function* () {
+            // Data State setup
+            let config = {
+              adapters: {
+                'default': memory,
+                 memory: memory
+              },
+              connections: {
+                memory: {
+                  adapter: 'memory'
+                }
+              },
+              defaults: {
+                migrate: 'alter'
+              }
+            };
 
-		this.consumer.on('message', this.recievedDataChangeEvent.bind(this));
-	}
+            this.models = yield this.initModels(config);
+            console.log("Finished models config");
+
+            // Kafka connection
+            let host  = yield kafka_config.zk();
+            let port  = yield kafka_config.port();
+            console.log("Zookeeper discovered at " + host + ":" + port);
+            let topic = yield kafka_config.topic();
+            let client = new Client(host + ":" + port);
+            let producer = yield this.connectToKafka(client, topic);
+            console.log('Kafka set to publish to ' + topic);
+
+            let consumer = yield this.connectConsumer(client, topic);
+            
+            consumer.on('message', this.recievedDataChangeEvent.bind(this));
+
+            this.consumer = consumer;
+            this.producer = producer;
+            this.topic    = topic;
+
+            this.producer.on('error', (err) => {
+                console.log("[Producer Error]:", err);
+            });
+
+            return;
+        }.bind(this)());
+    }
+
+    checkoffset () {
+        // new Offset(this.client)
+    }
+
+    hashPass (pass, done) {
+        bcrypt.hash(pass, 10, done);
+    }
+
+    checkCachedSession (token, referer) {
+        // Yeah you be good
+        return (token in this.sessionTokens);
+    }
 
     recievedDataChangeEvent (msg) {
-        console.dir(msg);
+        // console.dir(msg);
+        this.messagesRecieved += 1;
         let message = JSON.parse(msg.value);
         switch (message.version) {
             case "v0.1a":
@@ -44,7 +102,7 @@ class EventConsumer {
             if (err) {
                 console.log("account already made");
             } else {
-                console.log("Created Account", user.username);
+                console.log("[DATA CHANGE]: Created Account", user.username);
             }
         });
     }
@@ -53,11 +111,13 @@ class EventConsumer {
         var hasher = this.hashPass;
         return new Promise ((accept, reject) => {
             hasher(pass, function(err, hash) {
-                console
-                if(err) return reject(err);
+                if(err) {
+                    console.log(err);
+                    reject(err);
+                }
                 else 
                 {
-                   accept(JSON.stringify({
+                    let encoded = JSON.stringify({
                         "version": "v0.1a",
                         "creationDate": (new Date()).toISOString(),
                         "type": "creation",
@@ -65,7 +125,8 @@ class EventConsumer {
                             "user": user,
                             "pass": hash
                         }
-                    }));
+                    });
+                    accept(encoded);
                 }
             });
         });
@@ -79,6 +140,53 @@ class EventConsumer {
                 topic: topic,
                 messages: msg
             }], accept);
+        });
+    }
+
+    initModels (config) {
+        return new Promise((accept, reject) => {
+            models.initialize(config, function (err, models) {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                accept(models.collections);
+            });
+        });
+    }
+
+    connectToKafka (client, topic) {
+        return new Promise((accept, reject) => {
+            var producer = new Producer(client)
+            producer.on('ready', () => {
+                console.log("Creating topic if not exists =>", topic);
+                producer.createTopics([topic], false, (err, data) => {
+                    if (err) {
+                        console.log(err);
+                        reject(err);
+                    } else {
+                        console.log("->",data);
+                        accept(producer);
+                    }
+                });
+            });
+            producer.on('error', reject);
+        });
+    }
+
+    connectConsumer (client, topic) {
+        return new Promise((accept, reject) => {
+            var consumer = new Consumer(client,
+                [
+                    { 
+                        topic: topic,
+                        partition: 0
+                    }
+                ],
+                {
+                    autoCommit: false
+                });
+            accept(consumer);
         });
     }
 

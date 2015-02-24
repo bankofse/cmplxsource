@@ -44,7 +44,8 @@ router.post('/create', function (req, res, next) {
         token: token
       });
     })
-    .catch(() => {
+    .catch((err) => {
+      console.log(err);
       let error = new Error('Auth Error');
       error.status = 500;
       error.message = "Failed to create account";
