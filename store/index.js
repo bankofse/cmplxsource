@@ -16,7 +16,7 @@ class UserAccountStore {
 
     constructor () {
         console.log("==== Setting Up UserAccountStore ====");
-        
+
         this.eventConsumer = new EventConsumer();
 
         this.eventConsumer.setup()
@@ -67,7 +67,19 @@ class UserAccountStore {
         }.bind(this));
     }
 
+    generateToken (username) {
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+                       .toString(16)
+                       .substring(1);
+        }
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+               s4() + '-' + s4() + s4() + s4();
+    }
+
     auth (user, pass) {
+        var generate = this.generateToken;
+        var sessionUpdate = this.eventConsumer.updateSessionToken.bind(this.eventConsumer);
         return new Promise(function (accept, reject) {
             this.eventConsumer.models.user.findOne()
             .where({
@@ -81,7 +93,11 @@ class UserAccountStore {
                             reject(err);
                         }
                         if (res) {
-                            accept("New Token");
+                            let token = generate();
+                            sessionUpdate(user.username, token)
+                            .then(() => {
+                                accept(token);
+                            });
                         } else {
                             let error = new Error('User Error');
                             error.status = 401;
