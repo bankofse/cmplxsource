@@ -9,7 +9,9 @@ var kafka_config = require('../config/kafka'),
     Producer     = kafka.Producer,
     Client       = kafka.Client,
     Consumer     = kafka.Consumer,
-    EventConsumer = require('./storeWriter')
+    EventConsumer = require('./storeWriter'),
+    jwt          = require('jsonwebtoken'),
+    moment       = require('moment')
 ;
 
 class UserAccountStore {
@@ -44,7 +46,6 @@ class UserAccountStore {
     ask (req) {
         return new Promise(function (accept, reject) {
             let headers = req.headers;
-            // Assert Token Exists
             if (headers['token'] === undefined) {
                 let error = new Error('Token Error');
                 error.status = 400;
@@ -52,10 +53,22 @@ class UserAccountStore {
                 reject(error);
                 return;
             }
-
             // Assert Token Session is Valid
             let token = headers['token'];
-            if (this.eventConsumer.checkCachedSession(token, null)) {
+            let origin = headers['x-real-ip'];
+            
+            try {
+                var decoded = jwt.verify(token, 'shhhhh');    
+            } catch (e) {
+                console.log(e);
+                let error = new Error('Token Error');
+                error.status = 401;
+                error.message = "Token was invalid or modified";
+                reject(error);
+                return;
+            }
+            
+            if (decoded['accept-origin'] == origin) {
                 accept();
             } else {
                 let error = new Error('Token Error');
@@ -67,18 +80,19 @@ class UserAccountStore {
         }.bind(this));
     }
 
-    generateToken (username) {
-        function s4() {
-            return Math.floor((1 + Math.random()) * 0x10000)
-                       .toString(16)
-                       .substring(1);
-        }
-        return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-               s4() + '-' + s4() + s4() + s4();
+    generateToken (req, user) {
+        let headers = req.headers;
+        let origin = headers['x-real-ip'];
+        return jwt.sign({ 
+            'accept-origin': origin,
+            'accept-user': user,
+            'expires': moment().add(1, 'hour')
+        }, 'shhhhh');
     }
 
-    auth (user, pass) {
+    auth (req) {
         var generate = this.generateToken;
+        var user = req.body.user, pass = req.body.pass;
         var sessionUpdate = this.eventConsumer.updateSessionToken.bind(this.eventConsumer);
         return new Promise(function (accept, reject) {
             this.eventConsumer.models.user.findOne()
@@ -93,7 +107,7 @@ class UserAccountStore {
                             reject(err);
                         }
                         if (res) {
-                            let token = generate();
+                            let token = generate(req, user.username);
                             sessionUpdate(user.username, token)
                             .then(() => {
                                 accept(token);

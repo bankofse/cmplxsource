@@ -19,7 +19,7 @@ router.get('/', function(req, res, next) {
 
 router.post('/', function (req, res, next) {
   if (req.body.user && req.body.pass) {
-    req.accountstore.auth(req.body.user, req.body.pass)
+    req.accountstore.auth(req)
     .then((token) => {
       res.send({
         token: token

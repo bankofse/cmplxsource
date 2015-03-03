@@ -45,11 +45,10 @@ class EventConsumer {
             console.log("Finished models config");
 
             // Kafka connection
-            let host  = yield kafka_config.zk();
-            let port  = yield kafka_config.port();
-            console.log("Zookeeper discovered at " + host + ":" + port);
+            let host = yield kafka_config.zookeeper();
+            console.log("Zookeeper discovered at " + host);
             let topic = yield kafka_config.topic();
-            let client = new Client(host + ":" + port);
+            let client = new Client(host);
             let producer = yield this.connectToKafka(client, topic);
             console.log('Kafka set to publish to ' + topic);
 
@@ -71,11 +70,6 @@ class EventConsumer {
 
     checkoffset () {
         // new Offset(this.client)
-    }
-
-    checkCachedSession (token, referer) {
-        // Yeah you be good
-        return (token in this.sessionTokens);
     }
 
     buildSessionUpdateMessage (user, token) {

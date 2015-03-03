@@ -1,25 +1,32 @@
 "use strict";
-var req = require('request-promise');
+var req = require('request-promise'),
+    dns = require('dns')
+;
+
+const server_url = '104.236.25.50';
 
 module.exports = {
-    zk: () => {
-        return new Promise((accept, reject) => {
-            accept('cluster1.student.rit.edu');
-        });
-    },
-    port: () => {
-        return new Promise(function (accept, resolve) {
-            req("http://cluster1.student.rit.edu:8500/v1/catalog/service/zk")
-            .then((result) => {
-                let chunk = JSON.parse(result);
-                let value = chunk[0].ServicePort;
-                accept(value);
+    zookeeper: () => {
+        return new Promise(function (accept, reject) {
+            dns.setServers([server_url]);
+            dns.resolveSrv('zookeeper-2181.service.nyc.consul', function (err, lookup) {
+                if (err) reject(err);
+                else {
+                    var port = lookup[0].port;
+                    dns.resolve(lookup[0].name, function (err, host) {
+                        if (err) reject(err);
+                        else {
+                            let hostsrv = `${host[0]}:${port}`
+                            accept(hostsrv);
+                        }
+                    });
+                }
             });
         });
     },
     sessionSecret: () => {
         return new Promise(function (accept, resolve) {
-            req("http://cluster1.student.rit.edu:8500/v1/kv/systemwide/session/secret")
+            req(`http://${server_url}:8500/v1/kv/systemwide/session/secret1`)
             .then((result) => {
                 let chunk = JSON.parse(result);
                 let valueBase64 = chunk[0].Value;
@@ -31,7 +38,7 @@ module.exports = {
     topic: () => {
         let env = 'development';
         return new Promise(function (accept, resolve) {
-            req(`http://cluster1.student.rit.edu:8500/v1/kv/userauth/${env}/topic`)
+            req(`http://${server_url}:8500/v1/kv/userauth/${env}/topic`)
             .then((result) => {
                 let chunk = JSON.parse(result);
                 let valueBase64 = chunk[0].Value;
