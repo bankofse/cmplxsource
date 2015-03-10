@@ -15,9 +15,6 @@ var kafka_config = require('../config/kafka'),
 class EventConsumer {
 
     constructor () {
-        this.sessionTokens = { 
-            "test-token" : "7imbrook"
-        };
         // Heath Monitoring
         this.messagesRecieved = 0;
         setInterval(this.checkoffset.bind(this), 5000);
@@ -72,36 +69,6 @@ class EventConsumer {
         // new Offset(this.client)
     }
 
-    buildSessionUpdateMessage (user, token) {
-        return JSON.stringify({
-                "version": "v0.1a",
-                "creationDate": (new Date()).toISOString(),
-                "type": "sessionUpdate",
-                "payload": {
-                    "user": user,
-                    "token": token
-                }
-            });
-    }
-
-    updateSessionToken (user, token) {
-        return spawn(function* () {
-            let message = this.buildSessionUpdateMessage(user, token);
-            yield this.sendPayload(message);
-            return true;
-        }.bind(this)());
-    }
-
-    recievedSessionTokenUpdate (message) {
-        for (let key in this.sessionTokens) {
-            let val = this.sessionTokens[key];
-            if (val === message.user) {
-                delete this.sessionTokens[key];
-            }
-        }
-        this.sessionTokens[message.token] = message.user;
-    }
-
     hashPass (pass, done) {
         bcrypt.hash(pass, 10, done);
     }
@@ -115,8 +82,6 @@ class EventConsumer {
                 switch (message.type) {
                     case "creation":
                         this.createAccount(message.payload);
-                    case "sessionUpdate":
-                        this.recievedSessionTokenUpdate(message.payload);
             }
         }
     }

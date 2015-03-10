@@ -53,27 +53,29 @@ class UserAccountStore {
                 reject(error);
                 return;
             }
-            // Assert Token Session is Valid
+
             let token = headers['token'];
             let origin = headers['x-real-ip'];
             
+            // Assert Token Session is Valid
             try {
                 var decoded = jwt.verify(token, 'shhhhh');    
             } catch (e) {
                 console.log(e);
                 let error = new Error('Token Error');
-                error.status = 401;
+                error.status = 403;
                 error.message = "Token was invalid or modified";
                 reject(error);
                 return;
             }
             
-            if (decoded['accept-origin'] == origin) {
+            // Check Origin and Expiration
+            if ((decoded['accept-origin'] == origin) && moment(decoded['expires']).isAfter()){
                 accept();
             } else {
                 let error = new Error('Token Error');
-                error.status = 401;
-                error.message = "Token was invalid or origin was incorrect";
+                error.status = 403;
+                error.message = "Token is expired or origin was incorrect";
                 reject(error);
                 return;
             }
@@ -93,7 +95,6 @@ class UserAccountStore {
     auth (req) {
         var generate = this.generateToken;
         var user = req.body.user, pass = req.body.pass;
-        var sessionUpdate = this.eventConsumer.updateSessionToken.bind(this.eventConsumer);
         return new Promise(function (accept, reject) {
             this.eventConsumer.models.user.findOne()
             .where({
@@ -108,10 +109,7 @@ class UserAccountStore {
                         }
                         if (res) {
                             let token = generate(req, user.username);
-                            sessionUpdate(user.username, token)
-                            .then(() => {
-                                accept(token);
-                            });
+                            accept(token);
                         } else {
                             let error = new Error('User Error');
                             error.status = 401;
