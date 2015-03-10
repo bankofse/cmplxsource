@@ -3,7 +3,7 @@ var req = require('request-promise'),
     dns = require('dns')
 ;
 
-const server_url = 'docker.timbrook.im';
+const server_url = '104.131.19.7';
 
 module.exports = {
     zookeeper: () => {
