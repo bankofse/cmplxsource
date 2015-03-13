@@ -1,4 +1,4 @@
-var Fluxxor = require('Fluxxor'),
+var Fluxxor = require('fluxxor'),
     consts  = require('../constants/const');
 
 var UserStore = Fluxxor.createStore({
