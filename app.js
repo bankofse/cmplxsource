@@ -24,6 +24,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/_ping', (req, res) => res.status(200).end() );
+
 app.use('/auth', routes);
 
 // catch 404 and forward to error handler
