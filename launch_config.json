@@ -1,0 +1,16 @@
+{
+  "id": "auth-user",
+  "cpus": 0.5,
+  "mem": 64.0,
+  "instances": 2,
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "bankofse/auth-user",
+      "network": "BRIDGE",
+      "portMappings": [
+        { "containerPort": 3000, "hostPort": 0, "servicePort": 3000, "protocol": "tcp" }
+      ]
+    }
+  }
+}

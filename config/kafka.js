@@ -40,7 +40,7 @@ module.exports = {
     topic: () => {
         let env = 'development';
         return new Promise(function (accept, resolve) {
-            accept('dev.auth-user.v1')
+            accept('dev.auth-user.v1a')
             // req(`http://${server_url}:8500/v1/kv/userauth/${env}/topic`)
             // .then((result) => {
             //     let chunk = JSON.parse(result);
