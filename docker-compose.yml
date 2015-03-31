@@ -1,6 +1,0 @@
-# User Auth System
-
-auth:
-    build: bankofse/auth-user
-    ports:
-        - "3000"
