@@ -9,18 +9,8 @@
       "image": "bankofse/auth-user",
       "network": "BRIDGE",
       "portMappings": [
-        { "containerPort": 3000, "hostPort": 0, "servicePort": 3000, "protocol": "tcp" }
+        { "containerPort": 3000, "hostPort": 0, "servicePort": 80, "protocol": "tcp" }
       ]
     }
-  },
-  "healthChecks": [
-    {
-      "protocol": "HTTP",
-      "portIndex": 0,
-      "path": "/_ping",
-      "gracePeriodSeconds": 5,
-      "intervalSeconds": 20,
-      "maxConsecutiveFailures": 3
-    }
-  ]
+  }
 }
