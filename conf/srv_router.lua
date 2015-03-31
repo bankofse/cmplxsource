@@ -1,4 +1,4 @@
-local resolver = require "resty.dns.resolver"
+local http = require "resty.http"
 
 function abort(reason, code)
     ngx.status = code
@@ -10,41 +10,57 @@ function log(msg)
     ngx.log(ngx.ERR, msg, "\n")
 end
 
-local query_subdomain = ngx.var.target_domain
-local nameserver = {ngx.var.ns_ip, ngx.var.ns_port}
-
-local dns, err = resolver:new{
-  nameservers = {nameserver}, retrans = 2, timeout = 250
-}
-
-if not dns then
-        log("failed to instantiate the resolver: " .. err)
-    return abort("DNS error", 500)
-end
-log("Querying " .. query_subdomain)
-local records, err = dns:query(query_subdomain, {qtype = dns.TYPE_SRV})
-
-if not records then
-        log("failed to query the DNS server: " .. err)
-    return abort("Internal routing error", 500)
-end
-
-if records.errcode then
-    -- error code meanings available in http://bit.ly/1ppRk24
-    if records.errcode == 3 then
-        return abort("Not found", 404)
-    else
-        log("DNS error #" .. records.errcode .. ": " .. records.errstr)
-        return abort("DNS error", 500)
+-- Get and array of targets
+function split_result(str)
+    local results = {}
+    local i = 1
+    for w in string.gmatch(str, "%S+") do
+        results[i] = w
+        i = i + 1
     end
+    -- Remove the first two, they're not needed
+    table.remove(results, 1)
+    table.remove(results, 1)
+    return results
 end
 
-if records[1].port then
-    -- resolve the target to an IP
-    local target_ip = dns:query(records[1].target)[1].address
-    -- pass the target ip to avoid resolver errors
-        ngx.var.target = target_ip .. ":" .. records[1].port
-else
-        log("DNS answer didn't include a port")
-        return abort("Unknown destination port", 500)
+function fetch_backends() 
+    local httpc = http.new()
+    
+    marathon_host = "10.132.89.71"
+    task_query = "/v2/apps/" .. ngx.var.target .. "/tasks"
+    log("Querying " .. marathon_host .. task_query)
+
+    -- The generic form gives us more control. We must connect manually.
+    httpc:set_timeout(500)
+    httpc:connect(marathon_host, 8080)
+
+    -- And request using a path, rather than a full URI.
+    local res, err = httpc:request{
+          path = task_query,
+    }
+
+    if not res then
+        ngx.say("failed to request: ", err)
+        return
+    end
+
+    -- Now we can use the body_reader iterator, to stream the body according to our desired chunk size.
+    local reader = res.body_reader
+
+    local chunk, err = reader(8192)
+    if err then
+        ngx.log(ngx.ERR, err)
+        return
+    end
+
+    if chunk then
+        return chunk
+    end
+
 end
+
+raw = fetch_backends()
+result_array = split_result(raw)
+ngx.var.target = result_array[math.random(1, #result_array)]
+log("Forwarding to " .. ngx.var.target)

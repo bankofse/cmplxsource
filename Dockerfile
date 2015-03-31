@@ -11,12 +11,12 @@ RUN cd /openresty/ngx_openresty-1.7.2.1 && \
 ADD conf /nginx/conf
 RUN rm -rf /openresty && mkdir /nginx/logs
 
-EXPOSE 80
+ADD misc/lua-resty-http-0.05.tar.gz /lua-resty-http
+RUN cd /lua-resty-http/lua-resty-http-0.05 && make install
+RUN mv /usr/local/lib/lua/resty/http/* /usr/local/lib/lua/resty/
+RUN rm -rf /usr/local/lib/lua/resty/http/
+RUN rm -rf /lua-resty-http
 
-ENV NS_IP 104.236.245.92 
-ENV NS_PORT 53
-ENV TARGET web.service.nyc.consul
-ENV DOMAINS lvh.me,127.0.0.1.xip.io,9zlhb.xip.io
-ENV KEEP_TAGS true
+EXPOSE 80
 
 CMD ["/usr/bin/nginx", "-p", "/nginx/", "-c", "conf/nginx.conf"]
