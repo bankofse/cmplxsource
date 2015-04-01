@@ -12,6 +12,7 @@ var express = require('express'),
 ;
 
 const SIGNTOKEN = 'the_secret_aklsfalksjhdflkasjhdflkasjhdf';
+const AUTHSECRET = 'shhhhh';
 
 function createPayload(part, date, tid, body) {
   // TODO - determine roles from tid contents to remove --resuester --payee
@@ -24,11 +25,26 @@ function createPayload(part, date, tid, body) {
 }
 
 function requiresAuth(req, res, next) {
-  // TODO - this
-  req.autherizedAccount = {
-    accountID: 'testaccountid_a'
-  };
-  next();
+  // TODO check origin and expiration
+  if (req.headers.token) {
+    try {
+      let decoded = jwt.verify(req.headers.token, AUTHSECRET);
+      console.log(decoded);
+      req.autherizedAccount = {
+        accountID: decoded['accept-user']
+      }; 
+      next();
+    } catch(err) {
+      console.log(err);
+      next(new Error('Token Verification Failed'));
+    }
+  } else {
+    let e = new Error("Not Authorized");
+    e.status = 403;
+    next(e);
+  }
+
+  // next();
 }
 
 function requireTypeID(req, res, next) {
@@ -44,7 +60,7 @@ function requireTypeID(req, res, next) {
 function verifyTID(req, res, next) {
   try {
     let decoded = jwt.verify(req.params.tid, SIGNTOKEN);
-    req.transactionInfo = decoded;  
+    req.transactionInfo = decoded;
     next();
   } catch(err) {
     next(new Error('TID Verification Failed'));
@@ -74,21 +90,29 @@ function sendPayload(payload) {
   });
 }
 
-router.get('/create', [requiresAuth], function(req, res, next) {
-  let payload = {
-    to_account: req.autherizedAccount.accountID,
-    from_account: "gotten_from_request",
-    amount: 25.74
+router.post('/create', [requiresAuth], function(req, res, next) {
+  console.log(req.body);
+  if (req.body.request_from && req.body.amount) {
+    // TODO verify accounts and use account numbers (system not in place)
+    let payload = {
+      to_account: req.autherizedAccount.accountID,
+      from_account: req.body.request_from,
+      amount: req.body.amount
+    }
+    let tid = jwt.sign(payload, SIGNTOKEN);
+    res.send({
+      tid: tid
+    });
+    sendPayload(createPayload('requester', new Date(), tid, payload))
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((err) => console.log(error));;
+  } else {
+    let e = new Error("Invalid");
+    e.status = 401;
+    next(e);
   }
-  let tid = jwt.sign(payload, SIGNTOKEN);
-  res.send({
-    tid: tid
-  });
-  sendPayload(createPayload('requester', new Date(), tid, payload))
-  .then((data) => {
-    res.send(data);
-  })
-  .catch((err) => console.log(error));;
 });
 
 router.post('/complete', function (req, res) {
@@ -99,11 +123,18 @@ router.post('/complete', function (req, res) {
 
 /* post home page. */
 router.post('/complete/:tid', [requiresAuth, verifyTID], function(req, res, next) {
-  sendPayload(createPayload('payee', new Date(), req.params.tid, req.transactionInfo))
-  .then((data) => {
-    res.send(data);
-  })
-  .catch((err) => next(err));
+  if (req.transactionInfo.from_account == req.autherizedAccount.accountID) {
+    sendPayload(createPayload('payee', new Date(), req.params.tid, req.transactionInfo))
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((err) => next(err));
+  } else {
+    let e = new Error("Not Authorized to perform task");
+    e.status = 403;
+    next(e);
+  }
+  
 });
 
 module.exports = router;

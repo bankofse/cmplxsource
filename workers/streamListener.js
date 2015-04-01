@@ -42,11 +42,15 @@ class TransactionStream {
                 // TODO - Verify
                 console.log('responsible for completing transaction');
                 let transactions = resultset[1];
-                let amount = JSON.parse(transactions[0]).message.amount;
+                console.log(transactions);
+                let ta = JSON.parse(transactions[0]);
+                let amount = ta.message.amount;
+                let to_account = ta.message.to_account;
+                let from_account = ta.message.from_account;
                 this.collections.transaction.create({
                     amount: parseFloat(amount),
-                    to_account: "test A",
-                    from_account: "test B"
+                    to_account: to_account,
+                    from_account: from_account
                 }).then(function () {
                     console.log("Completed");
                     this.consumer.resume();    

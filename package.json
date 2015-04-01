@@ -16,5 +16,8 @@
     "redis": "^0.12.1",
     "sails-mysql": "^0.10.11",
     "waterline": "^0.10.19"
+  },
+  "devDependencies": {
+    "supertest": "^0.15.0"
   }
 }
