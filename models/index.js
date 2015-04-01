@@ -10,14 +10,7 @@ let config = {
      mysql: mysql
   },
   connections: {
-    mysql: {
-      adapter: 'mysql',
-      database: 'transaction',
-      host: '192.168.99.100',
-      port: 32000,
-      user: 'transaction',
-      password: 'transaction'
-    }
+    mysql: require('../config/config').mysql
   },
   defaults: {
     migrate: 'alter'
