@@ -39,10 +39,12 @@ class TransactionStream {
         multi.exec(function (err, resultset) {            
             let numResults = resultset[1].filter( x => x).length;
             if (numResults === 2 && resultset[0]) {
+                // TODO - Verify
                 console.log('responsible for completing transaction');
-                // console.log(resultset[1]);
+                let transactions = resultset[1];
+                let amount = JSON.parse(transactions[0]).message.amount;
                 this.collections.transaction.create({
-                    amount: 20.5,
+                    amount: parseFloat(amount),
                     to_account: "test A",
                     from_account: "test B"
                 }).then(function () {

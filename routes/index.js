@@ -78,7 +78,7 @@ router.get('/create', [requiresAuth], function(req, res, next) {
   let payload = {
     to_account: req.autherizedAccount.accountID,
     from_account: "gotten_from_request",
-    ammount: 25.74
+    amount: 25.74
   }
   let tid = jwt.sign(payload, SIGNTOKEN);
   res.send({
