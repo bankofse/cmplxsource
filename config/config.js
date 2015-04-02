@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-	topic: () => 'dev.transaction.v1a'
+	topic: () => 'dev.transaction.v1a',
 	mysql: {
 		adapter: 'mysql',
 		database: 'transaction',
