@@ -9,7 +9,7 @@
       "image": "bankofse/transaction:latest",
       "network": "BRIDGE",
       "portMappings": [
-        { "containerPort": 3000, "hostPort": 0, "servicePort": 0, "protocol": "tcp" }
+        { "containerPort": 4000, "hostPort": 0, "servicePort": 0, "protocol": "tcp" }
       ]
     }
   }

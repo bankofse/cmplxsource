@@ -9,10 +9,11 @@ var kafka    = require('kafka-node'),
     redis    = require('redis')
 ;
 
+const COMPLETION_TOPIC = 'dev.completed-transactions.v1';
+
 class TransactionStream {
 
-    constructor (zk, topic, collections) {
-        this.collections = collections;
+    constructor (zk, topic) {
         console.log(`Creating listener on topic ${topic}...`)
         let client = new Client(zk);
         this.redis = redis.createClient(31006, "10.132.89.72");
@@ -29,36 +30,68 @@ class TransactionStream {
         console.info("Done")
     }
 
-    eventRecieved (message) {
-        this.consumer.pause();
-        let multi = this.redis.multi();
-        let payload = JSON.parse(message.value);
-        // write to redis
-        multi.setnx(`${payload.id}--${payload.type}`, JSON.stringify(payload));
-        multi.mget([`${payload.id}--requester`, `${payload.id}--payee`]);
-        multi.exec(function (err, resultset) {            
-            let numResults = resultset[1].filter( x => x).length;
-            if (numResults === 2 && resultset[0]) {
-                // TODO - Verify
-                console.log('responsible for completing transaction');
-                let transactions = resultset[1];
-                console.log(transactions);
-                let ta = JSON.parse(transactions[0]);
-                let amount = ta.message.amount;
-                let to_account = ta.message.to_account;
-                let from_account = ta.message.from_account;
-                this.collections.transaction.create({
-                    amount: parseFloat(amount),
-                    to_account: to_account,
-                    from_account: from_account
-                }).then(function () {
-                    console.log("Completed");
-                    this.consumer.resume();    
-                }.bind(this));
-            } else {
-                this.consumer.resume();    
+    sendPayload (payload, topic) {
+        return new Promise((accept, reject) => {
+            let client = new Client('10.132.89.71:2181');
+            let producer = new Producer(client);
+            let body = [
+                  { 
+                    topic: topic, 
+                    messages: [payload]
+                  },
+              ];
+            producer.on('ready', () => {
+                producer.send(body, (err, data) => {
+                  if (err) {
+                      reject(err);
+                  } else {
+                      accept(data);
+                  }
+                  producer.close();
+                });
+            });
+        });
+    }
+
+    complete (id) {
+        // Check for both
+        this.redis.mget([id + 'r', id + 'p'], function (err, data) {
+            let finished = data.reduce( (l, p) => !!(l && p) );
+            if (finished) {
+                let create = JSON.parse(data[0]);
+                this.sendPayload(JSON.stringify(create.message), COMPLETION_TOPIC);
             }
         }.bind(this));
+    }
+
+    requesterHandle (id, body) {
+        console.log("handling transaction", id)
+        this.redis.setnx(id + "r", JSON.stringify(body), function (err, data) {
+            if(data) {
+                this.complete(id);
+            }
+        }.bind(this));
+    }
+
+    payeeHandle (body) {
+        console.log("finish transaction", body.tid)
+        this.redis.setnx(body.tid + "p", JSON.stringify(body), function (err, data) {
+            if(data) {
+                this.complete(body.tid);
+            }
+        }.bind(this));
+    }
+
+    eventRecieved (message) {
+        let body = JSON.parse(message.value);
+        // Requester
+        if (body.type == 'requester') {
+            this.requesterHandle(message.offset, body);
+        }
+        // Payee
+        else if (body.type == 'payee') {
+            this.payeeHandle(body);
+        }
 
     }
 

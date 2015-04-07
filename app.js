@@ -18,15 +18,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-
-// Create Listener
-models.orm.initialize(models.config, function (err, conn) {
-    if (err) {
-        console.log(err);
-    } else {
-        let listener = new TransactionListener('10.132.89.71:2181', config.topic(), conn.collections);
-    }
-});
+let listener = new TransactionListener('10.132.89.71:2181', config.topic());
 
 // Health
 app.get('/_ping', (req, res) => res.status(200).end() );
