@@ -25,16 +25,12 @@ module.exports = {
         //     });
         });
     },
-    sessionSecret: () => {
+    postgrestAPI: () => {
         return new Promise(function (accept, resolve) {
-            accept('sadfasdfas')
-            // req(`http://${server_url}:8500/v1/kv/systemwide/session/secret1`)
-            // .then((result) => {
-            //     let chunk = JSON.parse(result);
-            //     let valueBase64 = chunk[0].Value;
-            //     let topic = new Buffer(valueBase64, 'base64');
-            //     accept(topic.toString());
-            // });
+            req('http://10.132.89.71:8080/v2/apps/mon-accounts/tasks')
+            .then((result) => {
+                accept(result.split('\t')[2]);
+            });
         });
     },
     topic: () => {

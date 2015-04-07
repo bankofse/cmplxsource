@@ -8,10 +8,16 @@ var express  = require('express'),
     Client   = kafka.Client,
     jwt      = require('jsonwebtoken'),
     moment   = require('moment'),
-    req      = require('request-promise')
+    req      = require('request-promise'),
+    config   = require('../config/kafka')
 ;
 
 const AUTHSECRET = 'shhhhh';
+
+var postgresHost = '';
+config.postgrestAPI()
+  .then(function (host) { postgresHost = host; })
+  .catch(function (e) { console.log("Failed", e) });
 
 // Not used here, but stubbed for later inclustion in other projects
 function checkAuth(req, res, next) {
@@ -56,7 +62,7 @@ function generateToken (req, user) {
 
 function authenticate (user, pass) {
   return new Promise((accept, reject) => {
-    req('http://192.168.99.100:3000/users?username=eq.' + user)
+    req('http://' + postgresHost +'/users?username=eq.' + user)
     .then((res) => {
       let check = JSON.parse(res);
       let realhash = check[0].password_hash;
@@ -86,7 +92,7 @@ function hashPass (pass, done) {
 
 function createAccount (user, pass) {
   return new Promise((accept, reject) => {
-    req('http://192.168.99.100:3000/users?username=eq.' + user)
+    req('http://' + postgresHost + '/users?username=eq.' + user)
     .then((res) => {
       if(JSON.parse(res).length > 0) {
         reject("User Exists");
