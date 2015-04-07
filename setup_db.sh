@@ -11,10 +11,12 @@ echo ""
 echo "******DOCKER DATABASE CREATED******"
 
 runLater () {
-    sleep 5;
+    sleep 3;
     echo "Starting the DATABASE creation";
     psql -U accounts -f /tmp/schema.sql;
     echo "Done";
+
+    cd /etc/listener/ && node index.js;
 }
 
 runLater &

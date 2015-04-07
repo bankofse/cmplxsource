@@ -2,8 +2,9 @@
 CREATE TABLE accounts
 (
   id serial NOT NULL,
-  uid character varying(40),
+  uid int NOT NULL,
   card_id int,
+  created timestamp without time zone NOT NULL DEFAULT now(),
   CONSTRAINT accounts_pkey PRIMARY KEY (id)
 )
 WITH (
@@ -16,8 +17,8 @@ ALTER TABLE accounts
 CREATE TABLE cards
 (
   id serial NOT NULL,
-  card_number VARCHAR(40),
-  pin VARCHAR(4),
+  card_number VARCHAR(40) NOT NULL,
+  pin VARCHAR(4) NOT NULL,
   CONSTRAINT cards_pkey PRIMARY KEY (id)
 ) WITH (
   OIDS=FALSE
@@ -28,6 +29,29 @@ ALTER TABLE cards
 ALTER TABLE accounts
   ADD CONSTRAINT card_fk FOREIGN KEY (card_id)
       REFERENCES cards (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+-- Table: users
+
+-- DROP TABLE users;
+
+CREATE TABLE users
+(
+  id serial NOT NULL,
+  username character varying(20),
+  password_hash character varying(256),
+  created timestamp without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT users_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE users
+  OWNER TO accounts;
+
+ALTER TABLE accounts
+  ADD CONSTRAINT user_fk FOREIGN KEY (uid)
+      REFERENCES users (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 -- Table: transactions

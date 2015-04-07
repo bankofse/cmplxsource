@@ -8,6 +8,13 @@ var kafka     = require('kafka-node'),
     pg        = require('pg')
 ;
 
+// client.query("insert into users (username, password_hash) values ($1, $2)", 
+//     [act.user, act.passhash],
+//     function (err, response) {
+//         if (err) { log(err); done(); return; }
+//         done();
+//     });
+
 function log() {
     console.log.apply(null, ["[Kafka Listener][INFO]"].concat(Array.prototype.slice.call(arguments)));
 }
@@ -21,10 +28,11 @@ var topic = "dev.completed-transactions.v1";
 var client = new Client("10.132.89.71:2181");
 var consumer = new Consumer(client,
     [
-        { topic: topic }
+        { topic: topic },
+        { topic: 'dev.auth-user.v1a' }
     ],
     {
-        groupId: 'accounts-consumer-1',
+        groupId: 'replication-1',
         autoCommitIntervalMs: 0,
         autoCommit: true // Maybe not commit until verified transaction 
     });
@@ -44,48 +52,57 @@ consumer.on('error', function (err) {
  */
 var pg_connection = "postgres://accounts:accounts@192.168.99.100:5432/accounts";
 
-
 function completeTransaction(payload) {
+    
+    var toAct = payload.to_account;
+    var fromAct = payload.from_account;
+    var ammount = payload.amount;
 
-    // select * from amounts where account=? or account=? --> [to_account, from_account]
-    // check ammounts, WARNING maybe do server side to prevent race of multiple transactions
-    // insert into transactions (account, ammount) values (?, ?) --> [to_account, amount]
-    // insert into transactions (account, ammount) values (?, ?) --> [from_account, -amount]
-
-    pg.connect(pg_connection, function(err, client, done) {
-        if (err) { log(err.message); done(); return; }
-        log("Connected")
-        client.query("select a1.amount, a2.uid " + 
-                     "from amounts as a1 join accounts as a2 on a2.id=a1.account " +
-                     "where a2.uid=$1 limit 1;", 
-            [payload.from_account],
-            function (err, response) {
-                if (err) { log(err); done(); return; }
-                var from = response.rows[0];
-                if (from.amount >= payload.amount) {
-                    log("Funds are good");
-                } else {
-                    log("Insufient funds to complete");
-                    done();
-                    return;
-                }
-                client.query("insert into transactions (account, amount) values ($1, $2)", 
-                    [payload.to_account, payload.amount],
-                    function (err, response) {
-                        if (err) { log(err); done(); return; }
-                        log("Good A")
-                    client.query("insert into transactions (account, amount) values ($1, $2)", 
-                        [payload.from_account, (0 - payload.amount)],
-                        function (err, response) {
-                            if (err) { log(err); done(); return; }
-                            log("Good B")
-                            done();
-                        }); 
-                    });   
-            });
+    var toWait = getDefaultAccount(toAct);
+    var fromWait = getDefaultAccount(fromAct);
+    
+    toWait
+    .then(function (toAccount) {
+        fromWait.then(function (fromAccount) {
+            continueTransaction(toAccount, fromAccount);
+        });
+    }).catch(function (err) {
+        log(err);
     });
 
-    return true;
+    // Skipping fund checking for R1, aka unlimited money
+    var continueTransaction = function (toAccount, fromAccount) {
+        log("Finishing Transaction")
+        writeTransaction(toAccount, ammount);
+        writeTransaction(fromAccount, (0 - ammount));
+    }
+}
+
+function writeTransaction(account, amount) {
+    pg.connect(pg_connection, function(err, client, done) {
+        if (err) { log(err.message); done(); return; }
+        client.query("insert into transactions (account, amount) values ($1, $2);", 
+        [account, amount],
+        function (err, response) {
+            if (err) { log(err); done(); return; }
+            done();
+        });
+    });
+}
+
+function getDefaultAccount(account) {
+    return new Promise(function (accept, reject) {
+        pg.connect(pg_connection, function(err, client, done) {
+            if (err) { log(err.message); done(); reject(err); return; }
+            client.query("select a.id from accounts a join users u on u.id=a.uid where u.username=$1 limit 1;", 
+            [account],
+            function (err, response) {
+                if (err) { log(err); done(); return; }
+                accept(response.rows[0].id)
+                done();
+            });
+        });
+    });
 }
 
 function validatePayload(msg) {
@@ -98,17 +115,68 @@ function validatePayload(msg) {
     });
 }
 
-function incomingMessage(msg) {
+function createUserAccount(msg) {
     try {
-        var payload = JSON.parse(msg.value);
-    } catch(e) {
-        log("Malformed Payload");
+        var act = JSON.parse(msg);
+    } catch (e) {
+        log(e);
         return;
     }
-    if (validatePayload(payload)) {
-        log("Finishing transactions for", payload);
-        completeTransaction(payload);
-    } else {
-        log("Missing Properties");
+    // TODO find a postgres library that suports multiple statements
+    pg.connect(pg_connection, function(err, client, done) {
+        if (err) { log(err.message); done(); return; }
+        client.query("select * from users where username=$1", 
+        [act.user],
+        function (err, response) {
+            if (err) { log(err); done(); return; }
+            if (response.rowCount == 0) {
+                client.query("insert into users (username, password_hash) values ($1, $2)", 
+                [act.user, act.passhash],
+                function (err, response) {
+                    if (err) { log(err); done(); return; }
+                    client.query("select id from users where username=$1", 
+                    [act.user],
+                    function (err, response) {
+                        if (err) { log(err); done(); return; }
+                        var id = response.rows[0].id;
+                        client.query("insert into accounts (uid) values ($1)", 
+                        [id],
+                        function (err, response) {
+                            if (err) { log(err); done(); return; }
+                            log("Created Account for", act.user);
+                            done();
+                        });
+                    });
+                });
+            } else {
+                done();
+            }
+        });
+    });
+}
+
+function incomingMessage(msg) {
+    switch (msg.topic) {
+        case topic:
+        {
+            try {
+                var payload = JSON.parse(msg.value);
+            } catch(e) {
+                log("Malformed Payload:", msg.value);
+                return;
+            }
+            if (validatePayload(payload)) {
+                log("Finishing transactions for", payload);
+                completeTransaction(payload);
+            } else {
+                log("Missing Properties");
+            }
+        }
+        break;
+        case 'dev.auth-user.v1a':
+        {
+            createUserAccount(msg.value);
+        }
+        break;
     }
 }
