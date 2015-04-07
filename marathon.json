@@ -1,0 +1,16 @@
+{
+  "id": "mon-accounts",
+  "cpus": 0.25,
+  "mem": 64.0,
+  "instances": 1,
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "bankofse/monitary-accounts:latest",
+      "network": "BRIDGE",
+      "portMappings": [
+        { "containerPort": 3000, "hostPort": 0, "servicePort": 0, "protocol": "tcp" }
+      ]
+    }
+  }
+}

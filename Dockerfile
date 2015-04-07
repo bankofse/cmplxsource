@@ -1,7 +1,9 @@
 FROM postgres
 
 RUN apt-get update
-RUN apt-get install -y libgmp3-dev gcc net-tools
+RUN apt-get install -y libgmp3-dev gcc net-tools curl
+RUN curl -sL https://deb.nodesource.com/setup | bash -
+RUN apt-get install -y nodejs
 
 ADD https://www.haskell.org/platform/download/2014.2.0.0/haskell-platform-2014.2.0.0-unknown-linux-x86_64.tar.gz /
 RUN tar vxf haskell-platform-2014.2.0.0-unknown-linux-x86_64.tar.gz
