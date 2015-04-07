@@ -1,0 +1,16 @@
+{
+  "id": "transaction",
+  "cpus": 0.5,
+  "mem": 64.0,
+  "instances": 2,
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "bankofse/transaction:latest",
+      "network": "BRIDGE",
+      "portMappings": [
+        { "containerPort": 4000, "hostPort": 0, "servicePort": 0, "protocol": "tcp" }
+      ]
+    }
+  }
+}
