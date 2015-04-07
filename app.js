@@ -11,13 +11,6 @@ var routes = require('./routes/index'),
 
 var app = express();
 
-var accountstore = new Store()
-
-app.use((req, res, next) => {
-    req.accountstore = accountstore;
-    next();
-});
-
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
