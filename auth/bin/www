@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+var debug = require('debug')('auth-user');
+var app = require('../app');
+
+app.set('port', 3000);
+
+if (process.env.node_env == 'development') {
+	console.info("Running in development");
+	app.set('env', 'development');
+}
+
+var server = app.listen(app.get('port'), function() {
+  console.info('Express server listening on port ' + server.address().port);
+});
