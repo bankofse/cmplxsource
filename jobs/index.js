@@ -50,7 +50,7 @@ consumer.on('error', function (err) {
  *      > Separate Account for writing
  *      > Connection Pool
  */
-var pg_connection = "postgres://accounts:accounts@192.168.99.100:5432/accounts";
+var pg_connection = "postgres://accounts:accounts@localhost:5432/accounts";
 
 function completeTransaction(payload) {
     
