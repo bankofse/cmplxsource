@@ -99,7 +99,11 @@ function getDefaultAccount(account) {
             [account],
             function (err, response) {
                 if (err) { log(err); done(); return; }
-                accept(response.rows[0].id)
+                if (response.rowCount > 0) {
+                    accept(response.rows[0].id)    
+                } else {
+                    reject();
+                }
                 done();
             });
         });
