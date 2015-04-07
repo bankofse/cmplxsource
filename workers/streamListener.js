@@ -6,7 +6,8 @@ var kafka    = require('kafka-node'),
     Consumer = kafka.Consumer,
     Offset   = kafka.Offset,
     spawn    = require('../helpers').spawn,
-    redis    = require('redis')
+    redis    = require('redis'),
+    config   = require('../config/config')
 ;
 
 const COMPLETION_TOPIC = 'dev.completed-transactions.v1';
@@ -16,7 +17,8 @@ class TransactionStream {
     constructor (zk, topic) {
         console.log(`Creating listener on topic ${topic}...`)
         let client = new Client(zk);
-        this.redis = redis.createClient(31006, "10.132.89.72");
+        
+        this.redis = redis.createClient(config.redis.port, config.redis.host);
         this.consumer = new Consumer(client,
             [
                 { topic: topic }
