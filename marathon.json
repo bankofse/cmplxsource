@@ -9,7 +9,7 @@
       "image": "bankofse/monitary-accounts:latest",
       "network": "BRIDGE",
       "portMappings": [
-        { "containerPort": 3000, "hostPort": 0, "servicePort": 0, "protocol": "tcp" }
+        { "containerPort": 3000, "hostPort": 0, "servicePort": 5879, "protocol": "tcp" }
       ]
     }
   }

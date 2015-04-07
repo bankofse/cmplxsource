@@ -3,11 +3,9 @@ FROM postgres
 RUN apt-get update
 RUN apt-get install -y libgmp3-dev gcc net-tools curl build-essential wget
 
-RUN wget https://iojs.org/dist/v1.0.2/iojs-v1.0.2-linux-x64.tar.gz
-RUN tar zxf iojs-v1.0.2-linux-x64.tar.gz
-RUN cd iojs-v1.0.2-linux-x64
-RUN cp ./bin/* /usr/bin
-RUN ln 
+RUN apt-get install curl
+RUN curl -sL https://deb.nodesource.com/setup | bash -
+RUN apt-get install -y nodejs
 
 # ADD ./misc/haskell-platform-2014.2.0.0-unknown-linux-x86_64.tar.gz /
 ADD https://www.haskell.org/platform/download/2014.2.0.0/haskell-platform-2014.2.0.0-unknown-linux-x86_64.tar.gz /

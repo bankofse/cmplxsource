@@ -5,7 +5,8 @@ var kafka     = require('kafka-node'),
     Client    = kafka.Client,
     Consumer  = kafka.Consumer,
     Offset    = kafka.Offset,
-    pg        = require('pg')
+    pg        = require('pg'),
+    Promise   = require('promise')
 ;
 
 // client.query("insert into users (username, password_hash) values ($1, $2)", 
