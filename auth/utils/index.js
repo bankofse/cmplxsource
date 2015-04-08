@@ -1,10 +1,15 @@
 "use strict";
 
+var jwt = require('jsonwebtoken'),
+    moment = require('moment'),
+    consts = require('../consts')
+;
+
 module.exports = {
   checkAuth: function (req, res, next) {
     if (req.headers.token) {
       try {
-        let decoded = jwt.verify(req.headers.token, AUTHSECRET);
+        var decoded = jwt.verify(req.headers.token, consts.AUTHSECRET);
         req.autherizedAccount = {
           accountID: decoded['accept-user']
         };
@@ -13,7 +18,7 @@ module.exports = {
         next(new Error('Token Verification Failed'));
         return;
       }
-      let origin = headers['x-real-ip'];
+      let origin = req.headers['x-real-ip'];
       // Check Origin and Expiration
       if ((decoded['accept-origin'] == origin) && moment(decoded['expires']).isAfter()){
           next();
