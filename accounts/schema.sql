@@ -113,3 +113,17 @@ create trigger refresh_mat_view
 after insert or update or delete or truncate
 on transactions for each statement 
 execute procedure refresh_mat_view();
+
+-- View: accountsinfo
+CREATE OR REPLACE VIEW accountsinfo AS 
+ SELECT users.id AS user_id,
+    accounts.id AS account_number,
+    cards.card_number,
+    COALESCE(amounts.amount, 0::numeric) AS "amount"
+   FROM accounts
+     LEFT JOIN amounts ON accounts.id = amounts.account
+     LEFT JOIN cards ON accounts.card_id = cards.id
+     JOIN users ON accounts.uid = users.id;
+
+ALTER TABLE accountsinfo
+  OWNER TO accounts;

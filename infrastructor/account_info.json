@@ -1,0 +1,16 @@
+{
+  "id": "account-info",
+  "cpus": 0.5,
+  "mem": 64.0,
+  "instances": 2,
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "bankofse/account-info",
+      "network": "BRIDGE",
+      "portMappings": [
+        { "containerPort": 3000, "hostPort": 0, "servicePort": 80, "protocol": "tcp" }
+      ]
+    }
+  }
+}
