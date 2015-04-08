@@ -9,46 +9,16 @@ var express  = require('express'),
     jwt      = require('jsonwebtoken'),
     moment   = require('moment'),
     req      = require('request-promise'),
-    config   = require('../config/kafka')
+    config   = require('../config/kafka'),
+    consts   = require('../consts')
 ;
 
-const AUTHSECRET = 'shhhhh';
+const AUTHSECRET = consts.AUTHSECRET;
 
 var postgresHost = '';
 config.postgrestAPI()
   .then(function (host) { postgresHost = host; })
   .catch(function (e) { console.log("Failed", e) });
-
-// Not used here, but stubbed for later inclustion in other projects
-function checkAuth(req, res, next) {
-  if (req.headers.token) {
-    try {
-      let decoded = jwt.verify(req.headers.token, AUTHSECRET);
-      req.autherizedAccount = {
-        accountID: decoded['accept-user']
-      };
-    } catch(err) {
-      console.log(err);
-      next(new Error('Token Verification Failed'));
-      return;
-    }
-    let origin = headers['x-real-ip'];
-    // Check Origin and Expiration
-    if ((decoded['accept-origin'] == origin) && moment(decoded['expires']).isAfter()){
-        next();
-    } else {
-        let error = new Error('Token Error');
-        error.status = 403;
-        error.message = "Token is expired or origin was incorrect";
-        next(error);
-        return;
-    }
-  } else {
-    let e = new Error("Not Authorized");
-    e.status = 403;
-    next(e);
-  }
-}
 
 function generateToken (req, user) {
     let headers = req.headers;
