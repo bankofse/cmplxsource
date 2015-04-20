@@ -2,11 +2,11 @@ var express      = require('express'),
     path         = require('path'),
     logger       = require('morgan'),
     cookieParser = require('cookie-parser'),
-    bodyParser   = require('body-parser')
+    bodyParser   = require('body-parser'),
+    debug        = require('debug')('app')
 ;
 
-var routes = require('./routes/index'),
-    Store  = require('./store')
+var routes = require('./routes/index')
 ;
 
 var app = express();
@@ -15,7 +15,9 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+
+debug("KWT => " + process.env.TOPIC);
+debug("PRODUCTION => " + (process.env.PRODUCTION ? "True" : "False"));
 
 app.get('/_ping', (req, res) => res.status(200).end() );
 

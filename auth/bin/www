@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-var debug = require('debug')('auth-user');
+var debug = require('debug')('app');
 var app = require('../app');
 
-app.set('port', 3000);
+app.set('port', process.env.PORT || 3000);
 
 if (process.env.node_env == 'development') {
 	console.info("Running in development");
@@ -10,5 +10,13 @@ if (process.env.node_env == 'development') {
 }
 
 var server = app.listen(app.get('port'), function() {
-  console.info('Express server listening on port ' + server.address().port);
+	debug("Server listening on " + server.address().port);
 });
+
+process.on('SIGINT', exiting);
+process.on('SIGTERM', exiting);
+
+function exiting () {
+  debug('Quiting...');
+	process.exit(0);
+}

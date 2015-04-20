@@ -1,3 +1,3 @@
 module.exports = {
-	AUTHSECRET : 'shhhhh'
+	AUTHSECRET : process.env.AUTHSECRET
 }

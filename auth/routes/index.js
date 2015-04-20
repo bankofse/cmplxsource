@@ -9,21 +9,39 @@ var express  = require('express'),
     jwt      = require('jsonwebtoken'),
     moment   = require('moment'),
     req      = require('request-promise'),
-    config   = require('../config/kafka'),
-    consts   = require('../consts')
+    consts   = require('../consts'),
+    debug    = require('debug')('route'),
+    config   = require('../config'),
+    pool     = require('generic-pool')
 ;
 
 const AUTHSECRET = consts.AUTHSECRET;
 
-var postgresHost = '';
-config.postgrestAPI()
-  .then(function (host) { postgresHost = host; })
-  .catch(function (e) { console.log("Failed", e) });
+var producers = pool.Pool({
+    name     : 'kafka',
+    create   : function(callback) {
+      config.zk()
+      .then((address) => {
+        let client = new Client(address);
+        let producer = new Producer(client);
+        producer.on('ready', () => {
+          callback(null, producer);
+        });
+      }).catch( err => callback(err) );
+    },
+    destroy  : function(client) {
+      client.close();
+    },
+    max : 10,
+    min : 2,
+    idleTimeoutMillis : 30000,
+    log : false
+});
 
 function generateToken (req, user) {
     let headers = req.headers;
     let origin = headers['x-real-ip'];
-    return jwt.sign({ 
+    return jwt.sign({
         'accept-origin': origin,
         'accept-user': user,
         'expires': moment().add(1, 'hour')
@@ -32,13 +50,17 @@ function generateToken (req, user) {
 
 function authenticate (user, pass) {
   return new Promise((accept, reject) => {
-    req('http://' + postgresHost +'/users?username=eq.' + user)
+    config.accounts()
+    .then((addr) => {
+      let postgresHost = addr[0].Address + ":" + addr[0].ServicePort;
+      return req('http://' + postgresHost +'/users?username=eq.' + user);
+    })
     .then((res) => {
       let check = JSON.parse(res);
       let realhash = check[0].password_hash;
       bcrypt.compare(pass, realhash, (err, res) => {
         if (err) {
-          console.log(err);  
+          debug("bcrypt error: " + err.message);
           reject(err);
         }
         if (res) {
@@ -62,7 +84,11 @@ function hashPass (pass, done) {
 
 function createAccount (user, pass) {
   return new Promise((accept, reject) => {
-    req('http://' + postgresHost + '/users?username=eq.' + user)
+    config.accounts()
+    .then((addr) => {
+      let postgresHost = addr[0].Address + ":" + addr[0].ServicePort;
+      return req('http://' + postgresHost +'/users?username=eq.' + user);
+    })
     .then((res) => {
       if(JSON.parse(res).length > 0) {
         reject("User Exists");
@@ -84,24 +110,23 @@ function createAccount (user, pass) {
 
 function sendPayload(payload) {
   return new Promise((accept, reject) => {
-    let client = new Client('10.132.89.71:2181');
-    let producer = new Producer(client);
     let body = [
-          { 
-            topic: 'dev.auth-user.v1a', 
+          {
+            topic: process.env.TOPIC,
             messages: [payload]
           },
       ];
-    producer.on('ready', () => {
+      producers.acquire((err, producer) => {
       producer.send(body, (err, data) => {
         if (err) {
+          debug("Failed to publish " + err);
           reject(err);
         } else {
           accept(data);
         }
-        producer.close();
+        producers.release(producer);
       });
-    });
+    })
   });
 }
 
@@ -113,10 +138,13 @@ router.post('/', function (req, res, next) {
       res.send({
         username : user.username,
         token : token
-      });  
+      });
     })
     .catch((e) => {
-      next(e);
+      let error = new Error('Auth Error');
+      error.status = 500;
+      error.message = "Failed to authenticate";
+      next(error);
     });
   } else {
     let error = new Error('Auth Error');
@@ -130,12 +158,12 @@ router.post('/create', function (req, res, next) {
   if (req.body.user && req.body.pass) {
     createAccount(req.body.user, req.body.pass)
     .then(() => {
-      // Gen Token
       res.send({
-        token: "token"
+        status: 200
       });
     })
     .catch((err) => {
+      debug('Creation error ' + err);
       let error = new Error('Auth Error');
       error.status = 500;
       error.message = "Failed to create account";
