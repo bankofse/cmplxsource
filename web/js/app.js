@@ -3,6 +3,7 @@ var React  = require('react'),
     CmplxHome = require('./components/CmplxHome.react'),
     CmplxTransactions = require('./components/CmplxTransactions.react'),
     NavigationBar = require('./components/NavigationBar.react'),
+    Login = require('./components/Login.react'),
     Fluxxor = require('fluxxor'),
     Router = require('react-router'),
     DefaultRoute = Router.DefaultRoute,
@@ -20,6 +21,7 @@ var routes = (
   <Route>
     <Route name="home" path="/" handler={CmplxHome} />
     <Route name="userhome" path="/home" handler={CmplxTransactions} />
+    <Route name="loging" path="/login" handler={Login} />
   </Route>
 );
 

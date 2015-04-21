@@ -17,34 +17,18 @@ var NavigationBar = React.createClass({
 
     render: function() {
 
-      var flex = {
-        "display": "flex",
-        "flex-direction": "row",
-        "flex-grow": 4
-      }
-
-      var login = {
-        "display": "flex",
-        "flex-direction": "row",
-        "justify-content": "flex-end",
-      }
-
-      var logo = {
-        "display": "flex",
-        "flex-direction": "row",
-        "justify-content": "flex-start",
-      }
+      var links = [<li className="pure-menu-item"><a href="#/login" className="pure-menu-link">Sign In</a></li>]
 
       return (
         <div className="menu">
           <div className="header">
-            <div className="home-menu pure-menu pure-menu-open pure-menu-horizontal pure-menu-fixed" style={flex}>
-              <a href="" className="pure-menu-heading" style={logo}>
+            <div className="home-menu pure-menu pure-menu-open pure-menu-horizontal pure-menu-fixed">
+              <a href="" className="pure-menu-heading">
                 <img src="/images/Cmplx.svg" className="pure-menu-heading" width="250px" />
               </a>
-              <div style={login}>
-                <a className="pure-button pure-button-primary" href="#">Login</a>
-              </div>
+              <ul className="pure-menu-list">
+                {links}
+              </ul>
             </div>
           </div>
         </div>
