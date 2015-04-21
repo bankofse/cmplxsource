@@ -23,7 +23,7 @@ function setUserInfo (req, res, next) {
 
     debug('fetching user info for account ' + username);
     rp({
-        url: 'http://192.168.99.100:3000/users?username=eq.' + username,
+        url: 'http://' + process.env.ACCOUNTIP +'/users?username=eq.' + username,
         headers: {
             'Range-Unit': 'Item',
             'Range': '0-0'

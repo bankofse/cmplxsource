@@ -14,7 +14,7 @@ router.get('/accounts', function (req, res, next) {
 	let id = req.userinfo.id;
 	debug('fetching account info for user id' + id);
     rp({
-        url: 'http://192.168.99.100:3000/accountsinfo?user_id=eq.' + id
+        url: 'http://' + process.env.ACCOUNTIP +'/accountsinfo?user_id=eq.' + id
     })
     .then((response) => {
         res.send(response);

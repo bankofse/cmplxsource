@@ -9,4 +9,7 @@ RUN npm install
 
 EXPOSE 3000
 
-CMD DEBUG=accountinfo node --es_staging --harmony_arrow_functions bin/www
+ENV ACCOUNTIP 10.132.89.72:31007
+ENV DEBUG accountinfo
+
+CMD node --es_staging --harmony_arrow_functions bin/www
