@@ -2,15 +2,15 @@
   "id": "account-info",
   "cpus": 0.5,
   "mem": 64.0,
-  "instances": 2,
+  "instances": 1,
   "container": {
     "type": "DOCKER",
     "docker": {
-      "image": "bankofse/account-info",
+      "image": "bankofse/accountinfo",
       "forcePullImage": true,
       "network": "BRIDGE",
       "portMappings": [
-        { "containerPort": 3000, "hostPort": 0, "servicePort": 80, "protocol": "tcp" }
+        { "containerPort": 0, "hostPort": 0, "servicePort": 0, "protocol": "tcp" }
       ]
     }
   }

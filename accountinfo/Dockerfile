@@ -2,6 +2,7 @@ FROM iojs
 
 WORKDIR /src
 
+COPY ./auth_utils /auth/utils
 COPY ./ /src
 
 RUN npm install
