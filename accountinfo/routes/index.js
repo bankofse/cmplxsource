@@ -26,4 +26,19 @@ router.get('/accounts', function (req, res, next) {
 
 });
 
+router.get('/transactions', function (req, res, next) {
+    let id = req.userinfo.id;
+    debug('fetching account transactions for user id' + id);
+    rp({
+        url: 'http://' + process.env.ACCOUNTIP +'/transactions?account=eq.' + id
+    })
+    .then((response) => {
+        res.send(response);
+    }).catch((e) => {
+        console.error('Failed to fetch user info');
+        console.error(e);
+        next(new Error('Ops something went wrong'));
+    }); 
+});
+
 module.exports = router;

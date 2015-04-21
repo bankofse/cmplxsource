@@ -6,11 +6,11 @@
   "container": {
     "type": "DOCKER",
     "docker": {
-      "image": "bankofse/accountinfo",
+      "image": "bankofse/accountinfo:latest",
       "forcePullImage": true,
       "network": "BRIDGE",
       "portMappings": [
-        { "containerPort": 0, "hostPort": 0, "servicePort": 0, "protocol": "tcp" }
+        { "containerPort": 3000, "hostPort": 0, "servicePort": 6789, "protocol": "tcp" }
       ]
     }
   }
