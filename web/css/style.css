@@ -33,3 +33,22 @@
 .transaction-item .debit {
 	color: #E96E57;
 }
+
+.login {
+	flex-direction: colmn;
+	justify-content: center;
+}
+
+.login button {
+	background-color: #2BD61F;
+}
+
+.login input {
+	text-align: center;
+}
+
+.login img {
+	position: relative;
+	margin-top: -250px;
+	z-index: -1;
+}
