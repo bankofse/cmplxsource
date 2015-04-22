@@ -22,12 +22,14 @@ var CmplxHome = React.createClass({
 
   getStateFromFlux: function () {
     var flux = this.getFlux();
+    console.log('change!');
     return { 
       user : flux.store("UserStore").getState()
     };
   },
 
   render: function() {
+    console.log("Re render")
     return (
       <div className="chatapp">
         <NavigationBar />

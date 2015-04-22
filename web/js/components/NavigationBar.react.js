@@ -6,6 +6,7 @@ var React = require('react/addons'),
     Link = Router.Link,
     Route = Router.Route,
     RouteHandler = Router.RouteHandler,
+    StoreWatchMixin = Fluxxor.StoreWatchMixin,
     Const = require('../constants/const.js')
 ;
 
@@ -58,12 +59,12 @@ var NavButton = React.createClass({
 
 var NavigationBar = React.createClass({
 
-  mixins: [FluxMixin],
+  mixins: [FluxMixin, StoreWatchMixin("UserStore")],
 
   getInitialState: function() {
-    return { user : this.getFlux().store("UserStore").getState() };
+    return { };
   },
-
+  
   getStateFromFlux: function () {
     return { user : this.getFlux().store("UserStore").getState() };
   },
