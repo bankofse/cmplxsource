@@ -1,14 +1,37 @@
 var React = require('react/addons'),
     Fluxxor = require('fluxxor'),
-    FluxMixin = Fluxxor.FluxMixin(React)
+    FluxMixin = Fluxxor.FluxMixin(React),
+    Router = require('react-router'),
+    DefaultRoute = Router.DefaultRoute,
+    Link = Router.Link,
+    Route = Router.Route,
+    RouteHandler = Router.RouteHandler
 ;
+
+var LoginButton = React.createClass({
+    render: function() {
+        var note;
+        if(!this.props.loggedIn) {
+          note = "Sign In";
+        } else {
+          note = "Sign Out";
+        }
+        return (
+          <Link to="login">
+	    <button className="pure-button button-success">
+                {note}
+            </button>
+          </Link>
+        );
+    }
+});
 
 var NavigationBar = React.createClass({
 
     mixins: [FluxMixin],
 
     getInitialState: function() {
-      return {};
+      return { user : this.getFlux().store("UserStore").getState() };
     },
 
     getStateFromFlux: function () {
@@ -16,9 +39,6 @@ var NavigationBar = React.createClass({
     },
 
     render: function() {
-
-      var links = [<li className="pure-menu-item"><a href="#/login" className="pure-menu-link">Sign In</a></li>]
-
       return (
         <div className="menu">
           <div className="header">
@@ -27,7 +47,9 @@ var NavigationBar = React.createClass({
                 <img src="/images/Cmplx.svg" className="pure-menu-heading" width="250px" />
               </a>
               <ul className="pure-menu-list">
-                {links}
+                <li className="pure-menu-item">
+                  <LoginButton className="pure-menu-link" loggedIn={this.state.user.loggedin} />
+                </li>
               </ul>
             </div>
           </div>

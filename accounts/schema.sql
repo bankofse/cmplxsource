@@ -89,30 +89,15 @@ ALTER TABLE "joinAccountCard"
   OWNER TO accounts;
 
 -- Materialized View: amounts
-CREATE MATERIALIZED VIEW amounts AS 
+CREATE OR REPLACE VIEW amounts AS 
  SELECT transactions.account,
     sum(transactions.amount) AS amount,
     max(transactions.completed) AS lastest_recieved
    FROM transactions
-  GROUP BY transactions.account
-WITH DATA;
+  GROUP BY transactions.account;
 
 ALTER TABLE amounts
   OWNER TO accounts;
-
---- Auto Update Amounts view
-create or replace function refresh_mat_view()
-returns trigger language plpgsql
-as $$
-begin
-    refresh materialized view amounts;
-    return null;
-end $$;
-
-create trigger refresh_mat_view
-after insert or update or delete or truncate
-on transactions for each statement 
-execute procedure refresh_mat_view();
 
 -- View: accountsinfo
 CREATE OR REPLACE VIEW accountsinfo AS 

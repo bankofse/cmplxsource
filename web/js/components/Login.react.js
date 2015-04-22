@@ -18,7 +18,10 @@ var CmplxHome = React.createClass({
   mixins: [FluxMixin],
 
   getInitialState: function() {
-    return {};
+    var flux = this.getFlux();
+    return {
+      user : flux.store("UserStore").getState()
+    };
   },
 
   getStateFromFlux: function () {
@@ -42,6 +45,7 @@ var CmplxHome = React.createClass({
                   <button className="pure-button button-success">Sign In</button>
                 </form>
                 <img src="/images/Cmplx_logo_no_text_shadow.svg" className=""/>
+		<div>{this.state.user.loggedin}</div>
               </div>
             </div>
             <p className="splash-subhead">Welcome to The Kitchen</p>
@@ -53,7 +57,6 @@ var CmplxHome = React.createClass({
       </div>
     );
   }
-
 });
 
 module.exports = CmplxHome;
