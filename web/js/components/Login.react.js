@@ -42,7 +42,7 @@ var CmplxHome = React.createClass({
                   <input type="password" id="password" placeholder="Password" onChange={this.onChgPass} />
                   <button type="submit" className="pure-button button-success" onClick={this.login.bind(this)}>Sign In</button>
                 </form>
-                <img src="/images/Cmplx_logo_no_text_shadow.svg" className=""/>
+                <img src="/images/Cmplx_logo_no_text_shadow.svg" className="imgrot"/>
 		<div>{this.state.user.loggedin}</div>
               </div>
             </div>
