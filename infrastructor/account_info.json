@@ -3,6 +3,9 @@
   "cpus": 0.5,
   "mem": 64.0,
   "instances": 1,
+  "env" : {
+    "ACCOUNTIP": "10.132.89.49:31007"
+  },
   "container": {
     "type": "DOCKER",
     "docker": {

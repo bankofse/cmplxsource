@@ -14,7 +14,6 @@ module.exports =  {
 
   logoutUser: function() {
     Router.get().transitionTo('/login');
-    localStorage.removeItem('jwt');
     AppDispatcher.dispatch({
       actionType: LOGOUT_USER
     });

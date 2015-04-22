@@ -10,7 +10,8 @@
       "forcePullImage": true,
       "network": "BRIDGE",
       "portMappings": [
-        { "containerPort": 3000, "hostPort": 0, "servicePort": 5879, "protocol": "tcp" }
+        { "containerPort": 3000, "hostPort": 31007, "servicePort": 5879, "protocol": "tcp" },
+        { "containerPort": 5432, "hostPort": 0, "servicePort": 0, "protocol": "tcp" }
       ]
     }
   }
