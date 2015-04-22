@@ -49,14 +49,8 @@ var CmplxAccount = React.createClass({
  
       <div className="chatapp">
         <NavigationBar />
-            <div className="padded-content">
-              <div className="pure-u-md-3-4 padded-content"></div>
-              <div className="pure-u-md-1-4 pure-u-sm-1 padded-content">   
-                <input type="button" style={secondaryButton} className="pure-button-active" value="Info" />
-                <input type="button" style={secondaryButton} value="History" />
-              </div>
-              <div className="pure-u-md-1-4 padded-content"></div>
-              <div className="pure-u-md-3-4 pure-u-sm-1 padded-content">
+            <div className="padded-content">  
+              <div className="pure-u-md-2-4 pure-u-sm-1-2 padded-content">
                 <table>
                   <tr>
                     <td><h4 style={greyText}>User Id</h4></td>
@@ -76,6 +70,7 @@ var CmplxAccount = React.createClass({
                   </tr>
                 </table>
               </div>
+              <div className="pure-u-dm-2-4 pure-u-sm-1-2 padded-content">????</div>
             </div>
         <Footer />
       </div>
