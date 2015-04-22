@@ -9,7 +9,7 @@ var React = require('react/addons'),
     StoreWatchMixin = Fluxxor.StoreWatchMixin,
     Router = require('react-router'),
     Link = Router.Link,
-    Auth = require('../services/AuthService')
+    Const = require('../constants/const')
 ;
 
 var CmplxHome = React.createClass({
@@ -68,15 +68,12 @@ var CmplxHome = React.createClass({
 
   login(e) {
     e.preventDefault();
-    console.log(
-      "username: " + this.state.username + " " +
-      "password: " + this.state.password);
+    var u = this.state.username;
+    var p = this.state.username;
+    console.log("username: " + u + " password: " + p);
 
-    Auth.login(this.state.username, this.state.password)
-      .catch(function(err) {
-        alert("Problem logging in!");
-        console.log("Problem logging in!");
-      });
+    var Disp = this.getFlux().dispatcher;
+    Disp.dispatch({type: Const.LOGIN_USER, payload: {user: u, pass: p}});
   }
 
 });

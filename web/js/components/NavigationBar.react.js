@@ -10,12 +10,13 @@ var React = require('react/addons'),
 
 var LoginButton = React.createClass({
     render: function() {
-        var note;
+        /*var note;
         if(!this.props.loggedIn) {
           note = "Sign In";
         } else {
           note = "Sign Out";
-        }
+        }*/
+        var note = (!this.props.loggedIn) ? "Sign In" : "Sign Out";
         return (
           <Link to="login">
 	    <button className="pure-button button-success">
