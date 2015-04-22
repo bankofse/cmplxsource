@@ -1,3 +1,5 @@
+ 
+
 .sidebar {
 	padding-top: 83px;
 	background: #2c3e50;
@@ -39,7 +41,11 @@
 	justify-content: center;
 }
 
-.login button {
+/*.login button {
+	background-color: #2BD61F;
+}*/
+
+.login-start {
 	background-color: #2BD61F;
 }
 
@@ -51,6 +57,10 @@
 	position: relative;
 	margin-top: -250px;
 	z-index: -1;
+}
+
+.login-fail {
+        background-color: #CC0033;
 }
 
 /*.imgrot{

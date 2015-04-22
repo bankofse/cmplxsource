@@ -20,16 +20,18 @@ var UserStore  = Fluxxor.createStore({
 
     rest.wrap(defaultRequest, { 
       method: "GET"
+      // headers: { token: "" }
     })
     ({
       path: "https://cmplx.in/user",
       headers: { 'X-Requested-With': 'rest.js' }
     })
     .then(function (response) {
+      window.response = response;
       console.log(response);
     }.bind(this))
     .catch(function (err) {
-      console.log(err);
+      console.log("ERROR", err);
     });
 
   },
@@ -52,6 +54,7 @@ var UserStore  = Fluxxor.createStore({
 
         default:
           console.log("Not logged in")
+          this.emit("change");
 
       }
     }.bind(this));
@@ -64,7 +67,7 @@ var UserStore  = Fluxxor.createStore({
   },
 
   getState: function() {
-    return { loggedin : this.loggedin };
+    return { loggedin : this.loggedin, username : "imauser" };
   }
 
 });
