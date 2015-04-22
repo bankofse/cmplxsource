@@ -3,6 +3,10 @@ node_modules
 .DS_Store
 
 =======
+# Vim swap
+*.swp
+
+=======
 # Logs
 logs
 *.log

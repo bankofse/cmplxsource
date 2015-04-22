@@ -5,58 +5,96 @@ var React = require('react/addons'),
     DefaultRoute = Router.DefaultRoute,
     Link = Router.Link,
     Route = Router.Route,
-    RouteHandler = Router.RouteHandler
+    RouteHandler = Router.RouteHandler,
+    Const = require('../constants/const.js')
 ;
 
+/**
+ * LoginButton: when not logged in, links to the login route.
+ * when logged in, the button immediately logs you out.  
+ *
+ * LoginButton needs props for loggedIn:bool and flux:Fluxxor.Flux
+ */
 var LoginButton = React.createClass({
-    render: function() {
-        /*var note;
-        if(!this.props.loggedIn) {
-          note = "Sign In";
-        } else {
-          note = "Sign Out";
-        }*/
-        var note = (!this.props.loggedIn) ? "Sign In" : "Sign Out";
-        return (
-          <Link to="login">
-	    <button className="pure-button button-success">
-                {note}
-            </button>
-          </Link>
-        );
+  render: function() {
+    var css = "pure-button button-success";
+    if(!this.props.loggedIn) {
+      return (
+        <Link to="login">
+        <button className={css}>
+          Sign In
+        </button>     
+        </Link>
+      );
+    } else {
+      return (
+        <button className={css} onClick={this.logout}>
+          Sign Out
+        </button>
+      );
     }
+  }, 
+    
+  logout: function() {
+    console.log("logging out... I think");
+
+    var Disp = this.props.flux.dispatcher;
+    Disp.dispatch({type: Const.USER_LOGOUT, params: {}});
+  }
+});
+
+var NavButton = React.createClass({
+  render: function() {
+    var css = "pure-button button-success";
+    return (
+      <Link to={this.props.to}>
+        <button className={css}>
+          {this.props.name}
+        </button>
+      </Link>
+    );
+  },
 });
 
 var NavigationBar = React.createClass({
 
-    mixins: [FluxMixin],
+  mixins: [FluxMixin],
 
-    getInitialState: function() {
-      return { user : this.getFlux().store("UserStore").getState() };
-    },
+  getInitialState: function() {
+    return { user : this.getFlux().store("UserStore").getState() };
+  },
 
-    getStateFromFlux: function () {
-      return { user : this.getFlux().store("UserStore").getState() };
-    },
+  getStateFromFlux: function () {
+    return { user : this.getFlux().store("UserStore").getState() };
+  },
 
-    render: function() {
-      return (
-        <div className="menu">
-          <div className="header">
-            <div className="home-menu pure-menu pure-menu-open pure-menu-horizontal pure-menu-fixed">
-              <a href="" className="pure-menu-heading">
-                <img src="/images/Cmplx.svg" className="pure-menu-heading" width="250px" />
-              </a>
-              <ul className="pure-menu-list">
-                <li className="pure-menu-item">
-                  <LoginButton className="pure-menu-link" loggedIn={this.state.user.loggedin} />
-                </li>
-              </ul>
-            </div>
+  render: function() {
+    var loggedIn = this.state.user.loggedin;
+    return (
+      <div className="menu">
+        <div className="header">
+          <div className="home-menu pure-menu pure-menu-open pure-menu-horizontal pure-menu-fixed">
+            {/* Cmplx Logo */}
+            <a href="" className="pure-menu-heading">
+              <img src="/images/Cmplx.svg" className="pure-menu-heading" width="250px" />
+            </a>
+            {/* List of potential buttons. Right now, only LoginButton */}
+            <ul className="pure-menu-list">
+              <li className="pure-menu-item">
+                <NavButton className="pure-menu-link" to="accounts" name="Accounts" />
+              </li>
+              <li className="pure-menu-item">
+                <NavButton className="pure-menu-link" to="userhome" name="Transactions" />
+              </li>
+              <li className="pure-menu-item">
+                <LoginButton className="pure-menu-link" loggedIn={loggedIn} flux={this.getFlux()} />
+              </li>
+            </ul>
           </div>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 });
 
 module.exports = NavigationBar;
