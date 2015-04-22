@@ -16,6 +16,15 @@ var kafka     = require('kafka-node'),
 //         done();
 //     });
 
+function query (query, params) {
+    return new Promise(function (accept, reject) {
+        client.query(query, params, function (err, response) {
+            if (err) { log(err); done(); reject(err); return; }
+            accept(response);
+        });
+    });
+};
+
 function log() {
     console.log.apply(null, ["[Kafka Listener][INFO]"].concat(Array.prototype.slice.call(arguments)));
 }
@@ -57,7 +66,7 @@ function completeTransaction(payload) {
     
     var toAct = payload.to_account;
     var fromAct = payload.from_account;
-    var ammount = payload.amount;
+    var amount = payload.amount;
 
     var toWait = getDefaultAccount(toAct);
     var fromWait = getDefaultAccount(fromAct);
@@ -73,9 +82,9 @@ function completeTransaction(payload) {
 
     // Skipping fund checking for R1, aka unlimited money
     var continueTransaction = function (toAccount, fromAccount) {
-        log("Finishing Transaction")
-        writeTransaction(toAccount, ammount);
-        writeTransaction(fromAccount, (0 - ammount));
+        log("Finishing Transaction");
+        writeTransaction(toAccount, amount);
+        writeTransaction(fromAccount, (0 - amount));
     }
 }
 
@@ -102,7 +111,7 @@ function getDefaultAccount(account) {
                 if (response.rowCount > 0) {
                     accept(response.rows[0].id)    
                 } else {
-                    reject();
+                    accept(account);
                 }
                 done();
             });
