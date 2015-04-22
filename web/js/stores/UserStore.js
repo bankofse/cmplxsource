@@ -95,6 +95,7 @@ var UserStore  = Fluxxor.createStore({
 
   logoutUser: function() {
     this.loggedin = false;
+    localStorage.removeItem(AUTHKEY);
     this.emit("change");
   },
 

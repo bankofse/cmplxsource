@@ -70,8 +70,8 @@ var CmplxHome = React.createClass({
     var p = this.password;
     console.log("username: " + u + " password: " + p);
 
-    var Disp = this.getFlux().dispatcher;
-    Disp.dispatch({type: Const.LOGIN_USER, payload: {user: u, pass: p}});
+    this.getFlux().actions.login(u, p);
+    
   }
 
 });

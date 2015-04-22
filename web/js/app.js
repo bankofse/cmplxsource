@@ -12,7 +12,7 @@ var React  = require('react'),
     RouteHandler = Router.RouteHandler
 ;
 
-var flux = new Fluxxor.Flux(require("./stores"), {});
+var flux = new Fluxxor.Flux(require("./stores"), require('./actions'));
 
 window.flux = flux;
 window.React = React;

@@ -7,7 +7,7 @@ var React = require('react/addons'),
     Route = Router.Route,
     RouteHandler = Router.RouteHandler,
     StoreWatchMixin = Fluxxor.StoreWatchMixin,
-    Const = require('../constants/const.js')
+    Const = require('../constants/const')
 ;
 
 /**
@@ -17,6 +17,9 @@ var React = require('react/addons'),
  * LogButton needs props for loggedIn:bool and flux:Fluxxor.Flux
  */
 var LogButton = React.createClass({
+
+  mixins: [FluxMixin],
+
   render: function() {
     var css = "pure-button button-success pure-menu-link";
     if(!this.props.loggedIn) {
@@ -42,9 +45,7 @@ var LogButton = React.createClass({
     
   logout: function() {
     console.log("logging out... I think");
-
-    var Disp = this.props.flux.dispatcher;
-    Disp.dispatch({type: Const.USER_LOGOUT, params: {}});
+    this.getFlux().actions.logout();
   }
 });
 
@@ -95,14 +96,14 @@ var NavigationBar = React.createClass({
         <div className="header">
           <div className="home-menu pure-menu pure-menu-open pure-menu-horizontal pure-menu-fixed">
             {/* Cmplx Logo */}
-            <a href="" className="pure-menu-heading">
+            <a href="#" className="pure-menu-heading">
               <img src="/images/Cmplx.svg" className="pure-menu-heading" width="250px" />
             </a>
             {/* List of potential buttons. Right now, only LogButton */}
             <ul className="pure-menu-list">
               <NavButton loggedIn={loggedIn} to="accounts" name="Accounts" />
               <NavButton loggedIn={loggedIn} to="userhome" name="Transactions" />
-              <LogButton loggedIn={loggedIn} flux={this.getFlux()} />
+              <LogButton loggedIn={loggedIn} />
             </ul>
           </div>
         </div>
