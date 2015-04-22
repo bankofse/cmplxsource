@@ -41,10 +41,11 @@ var LogButton = React.createClass({
   }, 
     
   logout: function() {
-    console.log("logging out... I think");
-
     var Disp = this.props.flux.dispatcher;
-    Disp.dispatch({type: Const.USER_LOGOUT, params: {}});
+    Disp.dispatch({type: Const.LOGOUT_USER, payload: {}});
+  
+    // After logout, send the user back to the home page
+    window.location.hash = "";
   }
 });
 
