@@ -7,7 +7,7 @@ var UserStore = Fluxxor.createStore({
     this.jwt = null;
     this.bindActions(
         consts.LOGIN_USER, this.loginUser,
-        consts.LOGOUT_User, this.logoutUser
+        consts.LOGOUT_USER, this.logoutUser
     );
 
   },
