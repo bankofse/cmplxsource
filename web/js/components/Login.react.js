@@ -14,14 +14,10 @@ var React = require('react/addons'),
 
 var CmplxHome = React.createClass({
 
-  mixins: [FluxMixin],
+  mixins: [FluxMixin, StoreWatchMixin("UserStore")],
 
   getInitialState: function() {
-    return {
-      user: {loggedin: false},
-      username: '',
-      password: ''
-    };
+    return {};
   },
 
   getStateFromFlux: function () {
@@ -59,17 +55,17 @@ var CmplxHome = React.createClass({
   },
 
   onChgUser(event) {
-    this.state.username = event.target.value;
+    this.username = event.target.value;
   },
 
   onChgPass(event) {
-    this.state.password = event.target.value;
+    this.password = event.target.value;
   },
 
   login(e) {
     e.preventDefault();
-    var u = this.state.username;
-    var p = this.state.username;
+    var u = this.username;
+    var p = this.password;
     console.log("username: " + u + " password: " + p);
 
     var Disp = this.getFlux().dispatcher;
