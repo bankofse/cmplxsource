@@ -11,27 +11,31 @@ var React = require('react/addons'),
 ;
 
 /**
- * LoginButton: when not logged in, links to the login route.
+ * LogButton: when not logged in, links to the login route.
  * when logged in, the button immediately logs you out.  
  *
- * LoginButton needs props for loggedIn:bool and flux:Fluxxor.Flux
+ * LogButton needs props for loggedIn:bool and flux:Fluxxor.Flux
  */
-var LoginButton = React.createClass({
+var LogButton = React.createClass({
   render: function() {
-    var css = "pure-button button-success";
+    var css = "pure-button button-success pure-menu-link";
     if(!this.props.loggedIn) {
       return (
-        <Link to="login">
-        <button className={css}>
-          Sign In
-        </button>     
-        </Link>
+        <li className="pure-menu-item">
+          <Link to="login" >
+          <button className={css}>
+            Sign In
+          </button>     
+          </Link>
+        </li>
       );
     } else {
       return (
-        <button className={css} onClick={this.logout}>
-          Sign Out
-        </button>
+        <li className="pure-menu-item">
+          <button className={css} onClick={this.logout}>
+            Sign Out
+          </button>
+        </li>
       );
     }
   }, 
@@ -46,14 +50,29 @@ var LoginButton = React.createClass({
 
 var NavButton = React.createClass({
   render: function() {
-    var css = "pure-button button-success";
-    return (
-      <Link to={this.props.to}>
-        <button className={css}>
-          {this.props.name}
-        </button>
-      </Link>
-    );
+    var bsty = React.addons.classSet({
+      "pure-button": true,
+      "cant-nav": !this.props.loggedIn
+    });
+    if(this.props.loggedIn) {
+      return (
+        <li className="pure-menu-item">
+          <Link className="" to={this.props.to}>
+          <button className={bsty}>
+            {this.props.name}
+          </button>
+          </Link>
+        </li>
+      )
+    } else {
+      return (
+        <li className="pure-menu-item">
+          <button className={bsty} disabled>
+            {this.props.name}
+          </button> 
+        </li>
+      )
+    } 
   },
 });
 
@@ -79,17 +98,11 @@ var NavigationBar = React.createClass({
             <a href="" className="pure-menu-heading">
               <img src="/images/Cmplx.svg" className="pure-menu-heading" width="250px" />
             </a>
-            {/* List of potential buttons. Right now, only LoginButton */}
+            {/* List of potential buttons. Right now, only LogButton */}
             <ul className="pure-menu-list">
-              <li className="pure-menu-item">
-                <NavButton className="pure-menu-link" to="accounts" name="Accounts" />
-              </li>
-              <li className="pure-menu-item">
-                <NavButton className="pure-menu-link" to="userhome" name="Transactions" />
-              </li>
-              <li className="pure-menu-item">
-                <LoginButton className="pure-menu-link" loggedIn={loggedIn} flux={this.getFlux()} />
-              </li>
+              <NavButton loggedIn={loggedIn} to="accounts" name="Accounts" />
+              <NavButton loggedIn={loggedIn} to="userhome" name="Transactions" />
+              <LogButton loggedIn={loggedIn} flux={this.getFlux()} />
             </ul>
           </div>
         </div>
