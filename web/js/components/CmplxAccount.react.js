@@ -18,6 +18,7 @@ var CmplxAccount = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin("AccountStore")],
 
   getInitialState: function() {
+    var flux = this.getFlux();
     return {};
   },
 
@@ -27,6 +28,8 @@ var CmplxAccount = React.createClass({
       account : {"user_id":1,"account_number":1,"card_number":56773445,"amount":100}
     };
   },
+
+
 
   render: function() {
       var greyText = {
@@ -70,7 +73,37 @@ var CmplxAccount = React.createClass({
                   </tr>
                 </table>
               </div>
-              <div className="pure-u-dm-2-4 pure-u-sm-1-2 padded-content">????</div>
+              <div className="pure-u-dm-2-4 pure-u-sm-1-2 padded-content">
+                <table className="pure-table pure-table-bordered">
+                  <thead>
+                      <tr>
+                          <th>From</th>
+                          <th>To</th>
+                          <th>amount</th> 
+                      </tr>
+                  </thead>
+
+                  <tbody>
+                      <tr className="pure-table-odd">
+                          <td>1</td>
+                          <td>Honda</td>
+                          <td>Accord</td>
+                      </tr>
+
+                      <tr>
+                          <td>2</td>
+                          <td>Toyota</td>
+                          <td>Camry</td>
+                      </tr>
+
+                      <tr className="pure-table-odd">
+                          <td>3</td>
+                          <td>Hyundai</td>
+                          <td>Elantra</td>
+                      </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
         <Footer />
       </div>

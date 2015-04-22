@@ -47,7 +47,11 @@ render:function() {
                 <td style={valueText}>{e.account_type}</td>
                 <td style={valueText}>{e.account_number}</td>
                 <td style={valueText}>{e.balance}</td>
-                <td style={valueText}><Link to="/account/:id" params={{id:e.account_number}}><input type="button" className="button-secondary pure-button" value="History" /></Link></td>
+                <td style={valueText}>
+                  <Link to="/account/:id" params={{id:e.account_number}}>
+                    <input type="button" className="button-secondary pure-button" value="History" />
+                  </Link>
+                </td>
               </tr>
             );
        });
