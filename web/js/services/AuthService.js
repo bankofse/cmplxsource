@@ -12,7 +12,7 @@ module.exports = {
       crossOrigin: true,
       type: 'json',
       data: {
-        username, password
+        user, pass
       }
     })));
   },
@@ -21,14 +21,14 @@ module.exports = {
     LoginActions.logoutUser();
   },
 
-  signup: function(username, password, extra) {
+  signup: function(username, password) {
     return this.handleAuth(when(request({
       url: SIGNUP_URL,
       method: 'POST',
       crossOrigin: true,
       type: 'json',
       data: {
-        username, password, extra
+        user, pass
       }
     })));
   },
