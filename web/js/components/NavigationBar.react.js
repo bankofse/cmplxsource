@@ -43,6 +43,19 @@ var LoginButton = React.createClass({
   }
 });
 
+var NavButton = React.createClass({
+  render: function() {
+    var css = "pure-button button-success";
+    return (
+      <Link to={this.props.to}>
+        <button className={css}>
+          {this.props.name}
+        </button>
+      </Link>
+    );
+  },
+});
+
 var NavigationBar = React.createClass({
 
   mixins: [FluxMixin],
@@ -67,6 +80,12 @@ var NavigationBar = React.createClass({
             </a>
             {/* List of potential buttons. Right now, only LoginButton */}
             <ul className="pure-menu-list">
+              <li className="pure-menu-item">
+                <NavButton className="pure-menu-link" to="accounts" name="Accounts" />
+              </li>
+              <li className="pure-menu-item">
+                <NavButton className="pure-menu-link" to="userhome" name="Transactions" />
+              </li>
               <li className="pure-menu-item">
                 <LoginButton className="pure-menu-link" loggedIn={loggedIn} flux={this.getFlux()} />
               </li>

@@ -22,6 +22,7 @@ var routes = (
     <Route name="home" path="/" handler={CmplxHome} />
     <Route name="userhome" path="/home" handler={CmplxTransactions} />
     <Route name="login" path="/login" handler={Login} />
+    <Route name="accounts" path="/accounts" handler={CmplxHome} />
   </Route>
 );
 
