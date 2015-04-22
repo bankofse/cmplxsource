@@ -41,7 +41,11 @@
 	justify-content: center;
 }
 
-.login button {
+/*.login button {
+	background-color: #2BD61F;
+}*/
+
+.login-start {
 	background-color: #2BD61F;
 }
 
@@ -55,8 +59,8 @@
 	z-index: -1;
 }
 
-.cant-nav {
-        background-color: #B8BACC;
+.login-fail {
+        background-color: #CC0033;
 }
 
 /*.imgrot{
