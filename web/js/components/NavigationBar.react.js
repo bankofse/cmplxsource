@@ -48,11 +48,21 @@ var LogButton = React.createClass({
   }
 });
 
+var NameTag = React.createClass({
+  render: function() {
+    var user = this.props.user;
+    return (
+      <li className="pure-menu-item">
+        <b>{user.username}</b>
+      </li>
+    );
+  }
+});
+
 var NavButton = React.createClass({
   render: function() {
     var bsty = React.addons.classSet({
       "pure-button": true,
-      "cant-nav": !this.props.loggedIn
     });
     if(this.props.loggedIn) {
       return (
@@ -89,7 +99,18 @@ var NavigationBar = React.createClass({
   },
 
   render: function() {
-    var loggedIn = this.state.user.loggedin;
+    var user = this.state.user;
+    var nav;
+    if(user.loggedin) {
+      nav = [
+        <NameTag user={user} />,
+        <NavButton loggedIn={user.loggedin} to="accounts" name="Accounts" />,
+        <NavButton loggedIn={user.loggedin} to="userhome" name="Transactions" />
+      ];  
+    } else {
+      nav = <div />
+    }
+    var name = (user.loggedin) ? <NameTag user={user} /> : <div />; 
     return (
       <div className="menu">
         <div className="header">
@@ -100,9 +121,8 @@ var NavigationBar = React.createClass({
             </a>
             {/* List of potential buttons. Right now, only LogButton */}
             <ul className="pure-menu-list">
-              <NavButton loggedIn={loggedIn} to="accounts" name="Accounts" />
-              <NavButton loggedIn={loggedIn} to="userhome" name="Transactions" />
-              <LogButton loggedIn={loggedIn} flux={this.getFlux()} />
+              {nav}
+              <LogButton loggedIn={user.loggedin} flux={this.getFlux()} />
             </ul>
           </div>
         </div>
