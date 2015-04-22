@@ -22,7 +22,7 @@ var UserStore = Fluxxor.createStore({
     this.loggedin = false;
     this.jwt = null;
     this.emit("change");
-  }
+  },
 
   getState: function() {
     return { loggedin : this.loggedin, jwt: this.jwt, jwt_decode: this.jwt_decode };

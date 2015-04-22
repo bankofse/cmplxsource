@@ -2,8 +2,8 @@ var Router = require('react-router'),
     AppDispatcher = require('../dispatcher/Dispatcher.js'),
     consts  = require('../constants/const');
 
-export default {
-  loginUser: (jwt) => {
+module.exports =  {
+  loginUser: function(jwt) {
     Router.get().transitionTo('/');
     localStorage.setItem('jwt', jwt);
     AppDispatcher.dispatch({
@@ -11,7 +11,8 @@ export default {
       jwt: jwt
     });
   },
-  logoutUser: () => {
+
+  logoutUser: function() {
     Router.get().transitionTo('/login');
     localStorage.removeItem('jwt');
     AppDispatcher.dispatch({

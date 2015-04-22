@@ -9,8 +9,7 @@ var React = require('react/addons'),
     StoreWatchMixin = Fluxxor.StoreWatchMixin,
     Router = require('react-router'),
     Link = Router.Link,
-    Route = Router.Route,
-    RouteHandler = Router.RouteHandler
+    Auth = require('../services/AuthService')
 ;
 
 var CmplxHome = React.createClass({
@@ -18,9 +17,10 @@ var CmplxHome = React.createClass({
   mixins: [FluxMixin],
 
   getInitialState: function() {
-    var flux = this.getFlux();
     return {
-      user : flux.store("UserStore").getState()
+      user: {loggedin: false},
+      username: '',
+      password: ''
     };
   },
 
@@ -40,9 +40,9 @@ var CmplxHome = React.createClass({
             <div className="splash">
               <div className="login">
                 <form className="pure-form pure-form-stacked">
-                  <input type="text" placeholder="Username" />
-                  <input type="password" placeholder="Password" />
-                  <button className="pure-button button-success">Sign In</button>
+                  <input type="text" id="username" placeholder="Username" onChange={this.onChgUser} />
+                  <input type="password" id="password" placeholder="Password" onChange={this.onChgPass} />
+                  <button type="submit" className="pure-button button-success" onClick={this.login.bind(this)}>Sign In</button>
                 </form>
                 <img src="/images/Cmplx_logo_no_text_shadow.svg" className=""/>
 		<div>{this.state.user.loggedin}</div>
@@ -56,7 +56,29 @@ var CmplxHome = React.createClass({
         </div>
       </div>
     );
+  },
+
+  onChgUser(event) {
+    this.state.username = event.target.value;
+  },
+
+  onChgPass(event) {
+    this.state.password = event.target.value;
+  },
+
+  login(e) {
+    e.preventDefault();
+    console.log(
+      "username: " + this.state.username + " " +
+      "password: " + this.state.password);
+
+    Auth.login(this.state.username, this.state.password)
+      .catch(function(err) {
+        alert("Problem logging in!");
+        console.log("Problem logging in!");
+      });
   }
+
 });
 
 module.exports = CmplxHome;

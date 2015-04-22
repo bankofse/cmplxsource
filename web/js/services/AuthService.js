@@ -1,7 +1,7 @@
 var request = require('reqwest'),
     when = require('when'),
     consts  = require('../constants/const'),
-    LoginActions = require('../actions/userActions');
+    LoginActions = require('../actions/LoginActions');
 
 module.exports = {
 
