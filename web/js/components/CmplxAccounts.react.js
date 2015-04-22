@@ -47,6 +47,7 @@ render:function() {
                 <td style={valueText}>{e.account_type}</td>
                 <td style={valueText}>{e.account_number}</td>
                 <td style={valueText}>{e.balance}</td>
+                <td style={valueText}><Link to="/account/:id" params={{id:e.account_number}}><input type="button" className="button-secondary pure-button" value="History" /></Link></td>
               </tr>
             );
        });
@@ -58,8 +59,6 @@ render:function() {
             <div className="padded-content">
               <div className="pure-u-md-3-4 padded-content"></div>
               <div className="pure-u-md-1-4 pure-u-sm-1 padded-content">   
-                <input type="button" className="button-secondary pure-button" value="Info" />
-                <input type="button" className="button-secondary pure-button" value="History" />
               </div>
               <div className="pure-u-md-1-4 padded-content"></div>
               <div className="pure-u-md-3-4 pure-u-sm-1 padded-content">
@@ -68,7 +67,7 @@ render:function() {
                     <tr>
                       <td><h4 style={greyText}>Account Type</h4></td>
                       <td><h4 style={greyText}>Account Number</h4></td>
-                      <td><h4 style={greyText}>Balance</h4></td>
+                      <td><h4 style={greyText}>Balance</h4></td>  
                     </tr>
                   </thead>
                   <tbody>
@@ -80,6 +79,12 @@ render:function() {
         <Footer />
       </div>
     );
+  },
+
+  accountHistory(e, id) {
+    e.preventDefault();
+    console.log(id);
+    //this.getFlux().dispatcher({type: Const.ACCOUNT_HISTORY, payload: {accountNumber: this.accountNumber}});
   }
 
 });
