@@ -7,7 +7,7 @@ var React = require('react/addons'),
     Route = Router.Route,
     RouteHandler = Router.RouteHandler,
     StoreWatchMixin = Fluxxor.StoreWatchMixin,
-    Const = require('../constants/const')
+    Const = require('../constants/const.js')
 ;
 
 /**
@@ -44,8 +44,18 @@ var LogButton = React.createClass({
   }, 
     
   logout: function() {
-    console.log("logging out... I think");
     this.getFlux().actions.logout();
+  }
+});
+
+var NameTag = React.createClass({
+  render: function() {
+    var user = this.props.user;
+    return (
+      <li className="pure-menu-item">
+        <b>{user.username}</b>
+      </li>
+    );
   }
 });
 
@@ -53,7 +63,6 @@ var NavButton = React.createClass({
   render: function() {
     var bsty = React.addons.classSet({
       "pure-button": true,
-      "cant-nav": !this.props.loggedIn
     });
     if(this.props.loggedIn) {
       return (
@@ -90,7 +99,18 @@ var NavigationBar = React.createClass({
   },
 
   render: function() {
-    var loggedIn = this.state.user.loggedin;
+    var user = this.state.user;
+    var nav;
+    if(user.loggedin) {
+      nav = [
+        <NameTag key='0' user={user} />,
+        <NavButton key='1' loggedIn={user.loggedin} to="accounts" name="Accounts" />,
+        <NavButton key='2' loggedIn={user.loggedin} to="userhome" name="Transactions" />
+      ];  
+    } else {
+      nav = <div />
+    }
+    var name = (user.loggedin) ? <NameTag user={user} /> : <div />; 
     return (
       <div className="menu">
         <div className="header">
@@ -101,9 +121,8 @@ var NavigationBar = React.createClass({
             </a>
             {/* List of potential buttons. Right now, only LogButton */}
             <ul className="pure-menu-list">
-              <NavButton loggedIn={loggedIn} to="accounts" name="Accounts" />
-              <NavButton loggedIn={loggedIn} to="userhome" name="Transactions" />
-              <LogButton loggedIn={loggedIn} />
+              {nav}
+              <LogButton loggedIn={user.loggedin} />
             </ul>
           </div>
         </div>

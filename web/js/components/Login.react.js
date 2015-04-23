@@ -29,6 +29,22 @@ var CmplxHome = React.createClass({
   },
 
   render: function() {
+    var user = this.state.user;
+
+    // If a login attempt (causing this re-render) passed, then redirect
+    if(user.loggedin) {
+      window.location.hash = "home";
+    }
+
+    // If a login attempt (causing this re-render) failed, notify the user
+    var failed = user.loginfailed;
+    var substy = React.addons.classSet({
+      "login-start": !failed,
+      "login-fail": failed,
+      "pure-button": true
+    });
+    var subtxt = (failed) ? "Try Again" : "Sign In";
+
     console.log("Re render")
     return (
       <div className="chatapp">
@@ -40,7 +56,7 @@ var CmplxHome = React.createClass({
                 <form className="pure-form pure-form-stacked">
                   <input type="text" id="username" placeholder="Username" onChange={this.onChgUser} />
                   <input type="password" id="password" placeholder="Password" onChange={this.onChgPass} />
-                  <button type="submit" className="pure-button button-success" onClick={this.login.bind(this)}>Sign In</button>
+                  <button type="submit" className={substy} onClick={this.login.bind(this)}>{subtxt}</button>
                 </form>
                 <img src="/images/Cmplx_logo_no_text_shadow.svg" className="imgrot"/>
 		<div>{this.state.user.loggedin}</div>
