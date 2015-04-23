@@ -33,7 +33,7 @@ var CmplxHome = React.createClass({
 
     // If a login attempt (causing this re-render) passed, then redirect
     if(user.loggedin) {
-      window.location.hash = "home";
+      window.location.hash = "accounts";
     }
 
     // If a login attempt (causing this re-render) failed, notify the user
