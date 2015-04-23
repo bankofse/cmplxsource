@@ -49,7 +49,7 @@ render:function() {
                 <td style={valueText}>{e.balance}</td>
                 <td style={valueText}>
                   <Link to="/account/:id" params={{id:e.account_number}}>
-                    <input type="button" className="button-secondary pure-button" value="History" />
+                    <input type="button" className="button-secondary pure-button" value="Transactions" />
                   </Link>
                 </td>
               </tr>
@@ -71,7 +71,8 @@ render:function() {
                     <tr>
                       <td><h4 style={greyText}>Account Type</h4></td>
                       <td><h4 style={greyText}>Account Number</h4></td>
-                      <td><h4 style={greyText}>Balance</h4></td>  
+                      <td><h4 style={greyText}>Balance</h4></td>
+                      <td><h4 style={greyText}>Transactions</h4></td>  
                     </tr>
                   </thead>
                   <tbody>

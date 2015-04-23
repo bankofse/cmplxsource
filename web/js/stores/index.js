@@ -1,9 +1,9 @@
 var UserStore = require("./UserStore");
-var AccountStore = require("./AccountStore");
+var TransactionStore = require("./TransactionStore");
 var AccountsStore = require("./AccountsStore");
 
 module.exports = {
 	UserStore: new UserStore(),
-  AccountStore: new AccountStore(),
+  TransactionStore: new TransactionStore(),
   AccountsStore: new AccountsStore()
 }

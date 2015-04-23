@@ -10,12 +10,13 @@ var React = require('react/addons'),
     Router = require('react-router'),
     Link = Router.Link,
     Route = Router.Route,
-    RouteHandler = Router.RouteHandler
+    RouteHandler = Router.RouteHandler,
+    sprintf = require("sprintf").sprintf
 ;
 
 var CmplxAccount = React.createClass({
 
-  mixins: [FluxMixin, StoreWatchMixin("AccountStore")],
+  mixins: [FluxMixin, StoreWatchMixin("TransactionStore")],
 
   getInitialState: function() {
     var flux = this.getFlux();
@@ -25,11 +26,38 @@ var CmplxAccount = React.createClass({
   getStateFromFlux: function () {
     var flux = this.getFlux();
     return { 
-      account : {"user_id":1,"account_number":1,"card_number":56773445,"amount":100}
+      account : {"user_id":1,"account_number":1,"card_number":56773445,"amount":100},
+      trans: flux.store("TransactionStore").getState(0)
     };
   },
 
+  createTransTable: function() {
+    console.log("Test");
+    var jsxTable = this.state.trans.map(function(e, i){
+              return(
+                  <tr className={(i % 2 === 0) ? "pure-table-odd": ""}>
+                    <td>{("00000000" + parseInt(e.from)).slice(-8)}</td>
+                    <td>{("00000000" + parseInt(e.to)).slice(-8)}</td>
+                    <td>{sprintf("$%.2f", parseFloat(e.amount))}</td>
+                  </tr>
+                );
+            });
+    return(
+      <table className="pure-table pure-table-bordered">
+        <thead>
+            <tr>
+                <th>From</th>
+                <th>To</th>
+                <th>Amount</th> 
+            </tr>
+        </thead>
 
+        <tbody>
+            {jsxTable}
+        </tbody>
+      </table>
+    );
+  },
 
   render: function() {
       var greyText = {
@@ -74,35 +102,8 @@ var CmplxAccount = React.createClass({
                 </table>
               </div>
               <div className="pure-u-dm-2-4 pure-u-sm-1-2 padded-content">
-                <table className="pure-table pure-table-bordered">
-                  <thead>
-                      <tr>
-                          <th>From</th>
-                          <th>To</th>
-                          <th>amount</th> 
-                      </tr>
-                  </thead>
-
-                  <tbody>
-                      <tr className="pure-table-odd">
-                          <td>1</td>
-                          <td>Honda</td>
-                          <td>Accord</td>
-                      </tr>
-
-                      <tr>
-                          <td>2</td>
-                          <td>Toyota</td>
-                          <td>Camry</td>
-                      </tr>
-
-                      <tr className="pure-table-odd">
-                          <td>3</td>
-                          <td>Hyundai</td>
-                          <td>Elantra</td>
-                      </tr>
-                  </tbody>
-                </table>
+                {console.log("Test 0")}
+                {this.createTransTable()}
               </div>
             </div>
         <Footer />

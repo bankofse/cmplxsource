@@ -100,7 +100,7 @@ var UserStore  = Fluxxor.createStore({
   },
 
   getState: function() {
-    let username = "";
+    var username = "";
     if (isDefined(this, "userinfo.body.username")) {
       username = this.userinfo.body.username;
     }

@@ -8,7 +8,7 @@ var AccountsStore = Fluxxor.createStore({
     
     getAccounts: function(){
         //get all accounts for a certain user
-        var sample = {"account_type":savings, "account_number":1, "balance":100};
+        var sample = {"account_type":savings, "account_number":1, "balance":100, "user_id" : 1, "account_number":1, card_number:null};
         return sample;
     }
 });
