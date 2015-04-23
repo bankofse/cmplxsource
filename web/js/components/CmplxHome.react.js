@@ -44,7 +44,7 @@ var CmplxHome = React.createClass({
           </div>
           <div className="ribbon l-box-lrg pure-g">
               <div className="l-box-lrg is-center pure-u-1 pure-u-md-1-2 pure-u-lg-2-5">
-                <img alt="File Icons" src="/images/Cmplx_logo_no_text.svg" className="pure-img-responsive" width="150" />
+                <img alt="File Icons" src="/images/Cmplx_logo_no_text.svg" className="pure-img-responsive imgrot" width="150" />
               </div>
               <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-3-5">
                 <h2 className="content-head content-head-ribbon">What is this?</h2>
