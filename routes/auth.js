@@ -4,7 +4,7 @@ var express = require('express'),
     jwt     = require('jsonwebtoken'),
     moment  = require('moment'),
     bcrypt  = require('bcrypt'),
-    req     = require('request-promise'),
+    rp      = require('request-promise'),
     debug   = require('debug')('auth')
 ;
 
@@ -40,10 +40,23 @@ router.post('/', function (req, res, next) {
 router.post('/create', function (req, res, next) {
   if (req.body.user && req.body.pass) {
     createAccount(req.body.user, req.body.pass)
+    .then(() => rp(POSTGREST_HOST + '/users?username=eq.' + req.body.user))
+    .then(
+	(response) => {
+    	let body = JSON.parse(response);
+    	let id = body[0].id;
+    	return rp.post({
+			url: POSTGREST_HOST + '/accounts',
+			json: {
+				uid: id
+			}
+		});
+    })
     .then(() => {
-      res.send({
-        status: 200
-      });
+    	res.status(201);
+    	res.send({
+    		status: 201
+    	});
     })
     .catch((err) => {
       next(err);
@@ -56,7 +69,7 @@ function createAccount(user, pass) {
 		debug("Creating user " + user);
 		hashPass(pass)
 		.then((hash) => {
-			req.post({
+			rp.post({
 				url: POSTGREST_HOST + "/users",
 				json: {
 					username: user,
@@ -100,7 +113,7 @@ function hashPass (pass) {
 
 function authenticate (user, pass) {
   return new Promise((accept, reject) => {
-    req(POSTGREST_HOST +'/users?username=eq.' + user)
+    rp(POSTGREST_HOST +'/users?username=eq.' + user)
     .then((res) => {
       let check = JSON.parse(res);
       if (check.length == 0) {
