@@ -32,9 +32,23 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/create', function (req, res, next) {
-  
-  res.send("Creating a new account for your user");
-
+  rp.post({
+    url: POSTGREST_HOST + '/accounts',
+    json: {
+      uid: req.autherizedAccount.accountID
+    }
+  })
+  .then((response) => {
+    res.status(201);
+    res.send({
+      status: 201
+    });
+  })
+  .catch((response) => {
+    let err = new Error("Failed to create new account");
+    err.status = 501;
+    next(err);
+  });
 });
 
 module.exports = router;
