@@ -58,6 +58,8 @@ ALTER TABLE accounts
 CREATE TABLE transactions
 (
   id serial NOT NULL,
+  from_account integer NOT NULL,
+  description character varying(400),
   account integer NOT NULL,
   amount numeric NOT NULL,
   completed timestamp without time zone NOT NULL DEFAULT now(),
