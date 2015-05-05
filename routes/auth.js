@@ -17,7 +17,8 @@ router.post('/', function (req, res, next) {
   if (req.body.user && req.body.pass) {
     authenticate(req.body.user, req.body.pass)
     .then((user) => {
-      let token = generateToken(req, user.username)
+      debug(user);
+      let token = generateToken(req, user.username, user.id)
       res.send({
         username : user.username,
         token : token
@@ -91,10 +92,11 @@ function createAccount(user, pass) {
 	});
 }
 
-function generateToken (req, user) {
+function generateToken (req, user, id) {
     let headers = req.headers;
     return jwt.sign({
         'accept-user': user,
+        'accept-user-id': id,
         'expires': moment().add(1, 'hour')
     }, AUTHSECRET);
 }
@@ -128,7 +130,8 @@ function authenticate (user, pass) {
         }
         if (res) {
           accept({
-            username : check[0].username
+            username : check[0].username,
+            id : check[0].id
           });
         } else {
           let error = new Error('User Error');
@@ -149,7 +152,8 @@ function auth (req, res, next) {
         try {
             var decoded = jwt.verify(req.headers.token, AUTHSECRET);
             req.autherizedAccount = {
-                accountID: decoded['accept-user']
+                accountID: decoded['accept-user-id'],
+                accountUser: decoded['accept-user']
             };
         } catch(err) {
             next(new Error('Token Verification Failed'));
