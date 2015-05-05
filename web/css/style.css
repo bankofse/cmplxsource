@@ -1,0 +1,92 @@
+ 
+
+.sidebar {
+	padding-top: 83px;
+	background: #2c3e50;
+	height: 100vh;
+    border-right: thick solid #95a5a6;
+}
+
+.padded-content {
+	color: #000;
+	padding-top: 80px;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.transaction-item {
+	border-bottom: thin solid #415161;
+	height: 50px;
+}
+
+.transaction-item .ti-amount {
+	font-family: "Gotham SSm A","Gotham SSm B",sans-serif;
+	line-height: 1em;
+	font-weight: 500;
+	padding-top: 18px;
+	padding-right: 10px;
+	float: right;
+}
+
+.transaction-item .credit {
+	color: #54BF98;
+}
+
+.transaction-item .debit {
+	color: #E96E57;
+}
+
+.login {
+	flex-direction: colmn;
+	justify-content: center;
+}
+
+/*.login button {
+	background-color: #2BD61F;
+}*/
+
+.login-start {
+	background-color: #2BD61F;
+}
+
+.login input {
+	text-align: center;
+}
+
+.login img {
+	position: relative;
+	margin-top: -250px;
+	z-index: -1;
+}
+
+.login-fail {
+        background-color: #CC0033;
+}
+
+/*.imgrot{
+    -webkit-transition-property: -webkit-transform;
+    -webkit-transition-duration: 1s;
+
+    -moz-transition-property: -moz-transform;
+    -moz-transition-duration: 1s;
+}*/
+.imgrot {
+    -webkit-animation-name: rotate; 
+    -webkit-animation-duration: 15s; 
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+
+    -moz-animation-name: rotate; 
+    -moz-animation-duration: 15s; 
+    -moz-animation-iteration-count: infinite;
+    -moz-animation-timing-function: linear;
+}
+@-webkit-keyframes rotate {
+    from {-webkit-transform: rotate(0deg);}
+    to {-webkit-transform: rotate(360deg);}
+}
+
+@-moz-keyframes rotate {
+    from {-moz-transform: rotate(0deg);}
+    to {-moz-transform: rotate(360deg);}
+}
