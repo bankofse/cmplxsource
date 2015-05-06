@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var auth = require('./routes/auth');
 var accounts = require('./routes/accounts');
+var transactions = require('./routes/transactions');
 
 var app = express();
 
@@ -20,6 +21,7 @@ app.use(express.static(path.join(__dirname, 'web')));
 
 app.use('/auth', auth.routes);
 app.use('/account', [auth.authorized], accounts);
+app.use('/transactions', [auth.authorized], transactions);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

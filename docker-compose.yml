@@ -1,5 +1,5 @@
 db:
-  build: ./accounts
+  image: bankofse/accounts
   ports:
     - "3000:3000"
 
