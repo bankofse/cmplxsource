@@ -6,7 +6,7 @@ npm install
 # install redis
 ```
 
-Running
+Running on localhost
 ```
 $ docker-compose up
 $ disque-server
