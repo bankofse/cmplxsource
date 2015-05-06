@@ -61,7 +61,7 @@ function completeTransaction(payload) {
       json: {
         from_account: transaction.deposit_to,
         account: transaction.request_from,
-        amount: transaction.amount,
+        amount: (0 - transaction.amount),
         description: transaction.description
       }
     })
@@ -70,7 +70,7 @@ function completeTransaction(payload) {
       json: {
         from_account: transaction.request_from,
         account: transaction.deposit_to,
-        amount: (0 - transaction.amount),
+        amount: transaction.amount,
         description: transaction.description
       }
     }))
@@ -98,7 +98,7 @@ router.post('/create', function(req, res, next) {
   let payload = {
     request_from: req.body.account,
     amount: req.body.amount,
-    deposit_to: parseInt(req.body.deposit_to || req.autherizedAccount.accountID),
+    deposit_to: parseInt(req.body.deposit_to || req.autherizedAccount.accountID), // TODO default account
     description: req.body.deposit_to || "No description"
   };
   rp(POSTGREST_HOST + '/accounts?id=eq.' + payload.deposit_to)
