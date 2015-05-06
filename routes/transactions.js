@@ -1,16 +1,15 @@
 "use strict";
 
 var express = require('express'),
-    debug   = require('debug')('transaction'),
-    rp      = require('request-promise'),
-    disque  = require('disque.js'),
-    redis   = require('redis'),
-    config  = require('../config')
-;
+  debug = require('debug')('transaction'),
+  rp = require('request-promise'),
+  disque = require('disque.js'),
+  redis = require('redis'),
+  config = require('../config');
 
-var client  = disque.connect([config.disque.host + ":" + config.disque.port]);
-var cache   = redis.createClient(config.redis.port, config.redis.host);
-var router  = express.Router();
+var client = disque.connect([config.disque.host + ":" + config.disque.port]);
+var cache = redis.createClient(config.redis.port, config.redis.host);
+var router = express.Router();
 
 const POSTGREST_HOST = config.postgrest.host;
 
@@ -18,7 +17,7 @@ const POSTGREST_HOST = config.postgrest.host;
  * Handle Transactions
  */
 function handleJobs() {
-  var worker = disque.connect(['127.0.0.1:7711']);
+  var worker = disque.connect([config.disque.host + ":" + config.disque.port]);
   worker.getjob(['transaction-create', 'transaction-complete'], (err, jobs) => {
     if (err) return debug(err);
     jobs.forEach((job) => {
@@ -52,77 +51,79 @@ function handleJobs() {
   });
 }
 
-cache.on('connect', () => handleJobs() );
+cache.on('connect', () => handleJobs());
 
 function completeTransaction(payload) {
   let transaction = JSON.parse(payload.cached);
   debug(transaction)
   rp.post({
-    url : POSTGREST_HOST + '/transactions', 
-    json: { 
-      from_account: transaction.deposit_to, 
-      account: transaction.request_from, 
-      amount: transaction.amount, 
-      description: transaction.description
-    }
-  })
-  .then(() => rp.post({
-    url : POSTGREST_HOST + '/transactions', 
-    json: { 
-      from_account: transaction.request_from, 
-      account: transaction.deposit_to, 
-      amount: (0 - transaction.amount), 
-      description: transaction.description
-    }
-  }))
-  .then(() => debug('Completed'))
-  .catch(() => debug('Failed'));
-} 
+      url: POSTGREST_HOST + '/transactions',
+      json: {
+        from_account: transaction.deposit_to,
+        account: transaction.request_from,
+        amount: transaction.amount,
+        description: transaction.description
+      }
+    })
+    .then(() => rp.post({
+      url: POSTGREST_HOST + '/transactions',
+      json: {
+        from_account: transaction.request_from,
+        account: transaction.deposit_to,
+        amount: (0 - transaction.amount),
+        description: transaction.description
+      }
+    }))
+    .then(() => debug('Completed'))
+    .catch(() => debug('Failed'));
+}
 
 /*
  * Handle Requests
  */
 router.get('/', function(req, res, next) {
   debug('Fetching transactions for ' + req.autherizedAccount.accountUser);
-  rp(POSTGREST_HOST +'/accountsinfo?user_id=eq.' + req.autherizedAccount.accountID)
-  .then((response) => {
-    response = JSON.parse(response);
-    let acctNums = response.map((e) => e.account_number ).join(",");
-    return rp(POSTGREST_HOST + '/transactions?account=in.' + acctNums);
-  })
-  .then((transactions) => res.send(transactions))
-  .catch((err) => next(err));
+  rp(POSTGREST_HOST + '/accountsinfo?user_id=eq.' + req.autherizedAccount.accountID)
+    .then((response) => {
+      response = JSON.parse(response);
+      let acctNums = response.map((e) => e.account_number).join(",");
+      return rp(POSTGREST_HOST + '/transactions?account=in.' + acctNums);
+    })
+    .then((transactions) => res.send(transactions))
+    .catch((err) => next(err));
 });
 
 router.post('/create', function(req, res, next) {
   if (!req.body.account || !req.body.amount) return next(new Error("Not enough params"));
-  let payload  = {
-    request_from: req.body.account, 
+  let payload = {
+    request_from: req.body.account,
     amount: req.body.amount,
     deposit_to: parseInt(req.body.deposit_to || req.autherizedAccount.accountID),
     description: req.body.deposit_to || "No description"
   };
   rp(POSTGREST_HOST + '/accounts?id=eq.' + payload.deposit_to)
-  .then(r => JSON.parse(r)[0].uid)
-  .then((id) => { if (id != req.autherizedAccount.accountID) throw "Not authorised to perform this operation"; })
-  .then(() => rp(POSTGREST_HOST + '/accountsinfo?account_number=eq.' + payload.request_from))
-  .then((response) => {
-    let account = JSON.parse(response)[0];
-    if (account.amount < payload.amount) throw "Request Denied";
-    debug(payload);
-    return payload;
-  }).then((p) => {
-    client.addjob('transaction-create', JSON.stringify(p), 0, function(err, TID) {
-      if (err) return debug(err);
-      debug('Added job with ID ' + TID);
-      res.send({
-        tid: TID
+    .then(r => JSON.parse(r)[0].uid)
+    .then((id) => {
+      if (id != req.autherizedAccount.accountID) throw "Not authorised to perform this operation";
+    })
+    .then(() => rp(POSTGREST_HOST + '/accountsinfo?account_number=eq.' + payload.request_from))
+    .then((response) => {
+      let account = JSON.parse(response)[0];
+      if (account.amount < payload.amount) throw "Request Denied";
+      debug(payload);
+      return payload;
+    }).then((p) => {
+      client.addjob('transaction-create', JSON.stringify(p), 0, function(err, TID) {
+        if (err) return debug(err);
+        debug('Added job with ID ' + TID);
+        res.send({
+          tid: TID
+        });
       });
+    })
+    .catch((err) => {
+      next(err);
     });
-  })
-  .catch((err) => {
-    next(err);
-  });
 });
 
 router.post('/complete/:tid', function(req, res, next) {
@@ -131,19 +132,24 @@ router.post('/complete/:tid', function(req, res, next) {
     if (err || !response) return next(new Error("No transaction found"));
     let transaction = JSON.parse(response);
     rp(POSTGREST_HOST + '/accounts?id=eq.' + transaction.request_from)
-    .then(r => JSON.parse(r)[0].uid)
-    .then((id) => { if (id != req.autherizedAccount.accountID) throw "Not authorised to perform this operation"; })
-    .then(() => {
-      let body = {};
-      client.addjob('transaction-complete', JSON.stringify({ tid: req.params.tid, body: body }), 0, function(err, TID) {
-        if (err) return debug(err);
-        debug('Added finish job with ID ' + TID);
-        res.send({
-          status: 200
+      .then(r => JSON.parse(r)[0].uid)
+      .then((id) => {
+        if (id != req.autherizedAccount.accountID) throw "Not authorised to perform this operation";
+      })
+      .then(() => {
+        let body = {};
+        client.addjob('transaction-complete', JSON.stringify({
+          tid: req.params.tid,
+          body: body
+        }), 0, function(err, TID) {
+          if (err) return debug(err);
+          debug('Added finish job with ID ' + TID);
+          res.send({
+            status: 200
+          });
         });
-      });
-    })
-    .catch(err => next(new Error("Ops something went wrong")));
+      })
+      .catch(err => next(new Error("Ops something went wrong")));
   });
 });
 
