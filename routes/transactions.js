@@ -4,14 +4,15 @@ var express = require('express'),
     debug   = require('debug')('transaction'),
     rp      = require('request-promise'),
     disque  = require('disque.js'),
-    redis   = require('redis')
+    redis   = require('redis'),
+    config  = require('../config')
 ;
 
-var client  = disque.connect(['127.0.0.1:7711']);
-var cache   = redis.createClient(6379, '127.0.0.1');
+var client  = disque.connect([config.disque.host + ":" + config.disque.port]);
+var cache   = redis.createClient(config.redis.port, config.redis.host);
 var router  = express.Router();
 
-const POSTGREST_HOST = 'http://192.168.99.100:3000';
+const POSTGREST_HOST = config.postgrest.host;
 
 /*
  * Handle Transactions

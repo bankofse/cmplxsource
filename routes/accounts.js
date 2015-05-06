@@ -7,7 +7,7 @@ var express = require('express'),
 
 var router  = express.Router();
 
-const POSTGREST_HOST = 'http://192.168.99.100:3000';
+const POSTGREST_HOST = require('../config').postgrest.host;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
