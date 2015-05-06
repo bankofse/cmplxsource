@@ -1,0 +1,34 @@
+{
+  "accounts": [
+    {
+      "user" : "7imbrook",
+      "pass" : "mypass"
+    },
+    {
+      "user" : "steve",
+      "pass" : "mypass"
+    },
+    {
+      "user" : "test",
+      "pass" : "mypass"
+    },
+    {
+      "user" : "test1",
+      "pass" : "mypass"
+    },
+    {
+      "user" : "test2",
+      "pass" : "mypass"
+    },
+    {
+      "user" : "test3",
+      "pass" : "mypass"
+    }
+  ],
+  "transaction": {
+    "from_account" : 0,
+    "account": 0,
+    "amount": 0,
+    "description": "Magic $$"
+  }
+}
