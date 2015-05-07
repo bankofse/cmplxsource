@@ -5,7 +5,7 @@ var express = require('express'),
   moment = require('moment'),
   bcrypt = require('bcrypt'),
   rp = require('request-promise'),
-  debug = require('debug')('auth');
+  debug = require('debug')('cmplxsource:auth');
 
 const AUTHSECRET = 'somestring';
 const POSTGREST_HOST = require('../config').postgrest.host;

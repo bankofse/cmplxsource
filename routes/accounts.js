@@ -1,7 +1,7 @@
 "use strict";
 
 var express = require('express'),
-    debug   = require('debug')('accounts'),
+    debug   = require('debug')('cmplxsource:accounts'),
     rp      = require('request-promise')
 ;
 
