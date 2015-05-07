@@ -4,6 +4,7 @@ var React  = require('react'),
     CmplxTransactions = require('./components/CmplxTransactions.react'),
     CmplxAccount = require('./components/CmplxAccount.react'),
     CmplxAccounts = require('./components/CmplxAccounts.react'),
+    CmplxTransfer = require('./components/CmplxTransfer.react'),
     NavigationBar = require('./components/NavigationBar.react'),
     Login = require('./components/Login.react'),
     Fluxxor = require('fluxxor'),
@@ -26,6 +27,7 @@ var routes = (
     <Route name="login" path="/login" handler={Login} />
     <Route name="account" path="/account/:id" handler={CmplxAccount} />
     <Route name="accounts" path="/accounts" handler={CmplxAccounts} />
+    <Route name="transfer" path="/transfer" handler={CmplxTransfer} />
   </Route>
 );
 
