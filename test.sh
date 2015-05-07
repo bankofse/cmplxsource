@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HOST="http://localhost:3000";
+HOST="http://192.168.99.100";
 DB="http://192.168.99.100:3000";
 echo "Creating User Accounts";
 

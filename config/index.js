@@ -1,13 +1,13 @@
 module.exports = {
 	redis : {
 		port: 6379,
-		host: "192.168.99.100"
+		host: "cmplxsource_redis_1"
 	},
 	disque: {
 		port: 7711,
-		host: "192.168.99.100"
+		host: "cmplxsource_disque_1"
 	},
 	postgrest: {
-		host: "http://192.168.99.100:3000"
+		host: "http://cmplxsource_db_1:3000"
 	}
 }
