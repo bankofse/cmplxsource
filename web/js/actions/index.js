@@ -1,4 +1,10 @@
+"use strict";
+
 var consts = require('../constants/const');
+
+window.onhashchange = function (e) {
+	window.flux.dispatcher.dispatch({ type : consts.HASH_CHANGE, payload : e });
+}
 
 module.exports = {
 

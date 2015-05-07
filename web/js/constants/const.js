@@ -3,5 +3,6 @@ module.exports = {
   LOGIN_USER_COMPLETE : "LOGIN_USER_COMPLETE",
   LOGOUT_USER : "LOGOUT_USER",
   LOGIN_URL : "cmplx.in/auth",
-  SIGNUP_URL : "complx.in/auth/create"
+  SIGNUP_URL : "complx.in/auth/create",
+  HASH_CHANGE : "hashchangeevent"
 }
