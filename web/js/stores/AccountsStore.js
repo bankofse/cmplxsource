@@ -13,7 +13,8 @@ const AUTHKEY = "auth-token";
 var AccountsStore = Fluxxor.createStore({
     initialize: function() {
       this.bindActions(
-        consts.LOGIN_USER_COMPLETE, this.initOnLogin
+        consts.LOGIN_USER_COMPLETE, this.initOnLogin,
+        consts.HASH_CHANGE, this.getAccounts 
       );        
 
       this.client = rest.wrap(defaultRequest, {
