@@ -14,16 +14,16 @@ function checkCurrency (req, res, next) {
     let code = req.query.currency;
     debug("Converting Currency USD -> " + code);
     rp("http://openexchangerates.org/api/latest.json?app_id=4338c7cacc45464cbf92805b328d5d4d")
-     .then(r => JSON.parse(r))
-     .then(r => r.rates)
-     .then(r => r[code])
-     .then(r => parseFloat(r))
-     .then((rate) => {
+    .then(r => JSON.parse(r))
+    .then(r => r.rates)
+    .then(r => r[code])
+    .then(r => parseFloat(r))
+    .then((rate) => {
        req.exchange = {
-        rate: rate,
-        code: code
-      };
-      next();
+         rate: rate,
+         code: code
+       };
+       next();
     })
     .catch(e => next(new Error("Something went wrong")));
   } else next();
