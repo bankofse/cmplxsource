@@ -35,7 +35,7 @@ var UserStore  = Fluxxor.createStore({
       consts.LOGIN_USER_COMPLETE, this.loginUserComplete,
       consts.LOGOUT_USER, this.logoutUser
     ); 
-    this.loggedin = false;
+    this.loggedin = true;
 
     this.client = rest.wrap(defaultRequest, {
       method: "GET",

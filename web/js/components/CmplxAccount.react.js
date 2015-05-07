@@ -81,6 +81,8 @@ var CmplxAccount = React.createClass({
         <NavigationBar />
             <div className="padded-content">  
               <div className="pure-u-md-2-4 pure-u-sm-1-2 padded-content">
+                  <h1 style={greyText}>Account</h1>
+                      <br />
                 <table>
                   <tr>
                     <td><h4 style={greyText}>User Id</h4></td>
@@ -100,7 +102,7 @@ var CmplxAccount = React.createClass({
                   </tr>
                 </table>
               </div>
-              <div className="pure-u-dm-2-4 pure-u-sm-1-2 padded-content">
+              <div className="pure-u-dm-2-4 pure-u-sm-1-2 padded-content" style={marginTop}>
                 {this.createTransTable()}
               </div>
             </div>

@@ -21,12 +21,15 @@ var LogButton = React.createClass({
   mixins: [FluxMixin],
 
   render: function() {
-    var css = "pure-button button-success pure-menu-link";
+      var css = "pure-button button-success pure-menu-link";
+      var cssOut = "pure-button button-error pure-menu-link";
+      var logOut = {backgroundColor:"#E60000", marginRight:15};
+      var logIn = {backgroundColor:"#33CC33", marginRight:15};
     if(!this.props.loggedIn) {
       return (
         <li className="pure-menu-item">
           <Link to="login" >
-          <button className={css}>
+          <button className={css} style={logIn}>
             Sign In
           </button>     
           </Link>
@@ -35,7 +38,7 @@ var LogButton = React.createClass({
     } else {
       return (
         <li className="pure-menu-item">
-          <button className={css} onClick={this.logout}>
+          <button className={cssOut} style={logOut} onClick={this.logout}>
             Sign Out
           </button>
         </li>
@@ -60,15 +63,16 @@ var NameTag = React.createClass({
 });
 
 var NavButton = React.createClass({
-  render: function() {
+    render: function() {
+        
     var bsty = React.addons.classSet({
-      "pure-button": true,
+        "pure-button": true
     });
     if(this.props.loggedIn) {
       return (
         <li className="pure-menu-item">
           <Link className="" to={this.props.to}>
-          <button className={bsty}>
+          <button style={this.props.style} className={bsty}>
             {this.props.name}
           </button>
           </Link>
@@ -99,13 +103,18 @@ var NavigationBar = React.createClass({
   },
 
   render: function() {
+      var marginRight = {
+          marginRight:80,
+          marginLeft:0
+      };
     var user = this.state.user;
     var nav;
     if(user.loggedin) {
       nav = [
         <NameTag key='0' user={user} />,
         <NavButton key='1' loggedIn={user.loggedin} to="accounts" name="Accounts" />,
-        <NavButton key='2' loggedIn={user.loggedin} to="userhome" name="Transactions" />
+        <NavButton key='2' loggedIn={user.loggedin} to="transfer" name="Transfer" />,
+        <NavButton key='3' loggedIn={user.loggedin} style={marginRight} to="userhome" name="Transactions" />
       ];  
     } else {
       nav = <div />
