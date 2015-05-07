@@ -60,6 +60,9 @@ var CmplxAccount = React.createClass({
   },
 
   render: function() {
+    var marginTop = {
+      marginTop: 75
+    };
     var greyText = {
       color:'#575757',
       marginTop:0
