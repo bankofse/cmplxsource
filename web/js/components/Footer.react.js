@@ -4,7 +4,9 @@ var React = require('react')
 var Footer = React.createClass({
   render: function() {
       var style = {
-          marginTop:100
+          position:'fixed',
+          bottom:0,
+          width:'100%'
       };
     return (
       <div style={style} className="footer l-box is-center">
