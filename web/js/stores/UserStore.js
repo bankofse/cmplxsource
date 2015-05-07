@@ -32,6 +32,7 @@ var UserStore  = Fluxxor.createStore({
   initialize: function() {
     this.bindActions(
       consts.LOGIN_USER, this.loginUser,
+      consts.LOGIN_USER_COMPLETE, this.loginUserComplete,
       consts.LOGOUT_USER, this.logoutUser
     ); 
     this.loggedin = false;
@@ -42,7 +43,6 @@ var UserStore  = Fluxxor.createStore({
         token: localStorage.getItem(AUTHKEY)
       }
     });
-
 
     this.client({
       path: "/user/"
@@ -81,16 +81,23 @@ var UserStore  = Fluxxor.createStore({
         case 200:
           this.loggedin = true;
           localStorage.setItem(AUTHKEY, response.entity.token);
-          this.emit("change");
+          
+          this.flux.actions.login_complete();
+          //this.emit("change");
           break;
 
         default:
           console.log("Not logged in")
-          this.emit("change");
 
+          this.flux.actions.login_complete();
+          //this.emit("change");
       }
     }.bind(this));
 
+  },
+
+  loginUserComplete: function(payload) {
+    this.emit("change"); 
   },
 
   logoutUser: function() {

@@ -6,6 +6,10 @@ module.exports = {
 		this.dispatch(consts.LOGIN_USER, { user, pass });
 	},
 
+    login_complete () {
+        this.dispatch(consts.LOGIN_USER_COMPLETE, {});
+    },
+
 	logout () {
 		this.dispatch(consts.LOGOUT_USER, {});
 	}
