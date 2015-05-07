@@ -14,7 +14,8 @@ var TransactionStore = Fluxxor.createStore({
 
   initialize: function() {
     this.bindActions(
-      consts.LOGIN_USER_COMPLETE, this.initOnLogin // Init store data on login 
+      consts.LOGIN_USER_COMPLETE, this.initOnLogin, // Init store data on login 
+      consts.HASH_CHANGE, this.locationChange
     );
 
     this.client = rest.wrap(defaultRequest, {
@@ -25,6 +26,10 @@ var TransactionStore = Fluxxor.createStore({
     });
 
     this.transactions = [];
+  },
+
+  locationChange: function (payload, type) {
+    this.getTransactions();
   },
 
   initOnLogin: function(payload, type) {
