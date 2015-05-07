@@ -12,7 +12,7 @@ var TransactionItemSB = React.createClass({
 		return (
 			<div className="transaction-item">
 				<div className={classes}>
-					# {this.props.amount}
+					{this.props.account} # {this.props.amount}
 				</div>
 				
 			</div>

@@ -64,6 +64,9 @@ var TransactionStore = Fluxxor.createStore({
   },
 
   getState: function(mon_acct) {
+    if (mon_acct === undefined) {
+      return this.transactions;
+    }
     console.log("TransactionStore.getState()", mon_acct);
 
     var filtered = this.transactions.filter(function (el) {
