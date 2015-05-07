@@ -60,6 +60,12 @@ var AccountsStore = Fluxxor.createStore({
 
     getState: function() {
       return this.mon_accts;
+    },
+
+    getAccount: function(acct_num) {
+      return this.mon_accts.filter(function (el) {
+        return el.account_number == acct_num;
+      })[0];
     }
 });
 
