@@ -7,3 +7,9 @@ redis:
   image: redis
   ports:
     - "6379:6379"
+
+disque:
+  image: virtualroot/docker-disque
+  ports:
+    - "7711:7711"
+    - "7712:7712"
