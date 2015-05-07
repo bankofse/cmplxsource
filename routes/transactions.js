@@ -78,6 +78,7 @@ function completeTransaction(payload) {
     .catch(() => debug('Failed'));
 }
 
+
 /*
  * Handle Requests
  */
