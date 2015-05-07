@@ -113,7 +113,8 @@ var NavigationBar = React.createClass({
       nav = [
         <NameTag key='0' user={user} />,
         <NavButton key='1' loggedIn={user.loggedin} to="accounts" name="Accounts" />,
-        <NavButton key='2' loggedIn={user.loggedin} style={marginRight} to="userhome" name="Transactions" />
+        <NavButton key='2' loggedIn={user.loggedin} to="transfer" name="Transfer" />,
+        <NavButton key='3' loggedIn={user.loggedin} style={marginRight} to="userhome" name="Transactions" />
       ];  
     } else {
       nav = <div />
