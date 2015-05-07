@@ -17,9 +17,7 @@ var CmplxAccounts = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin("AccountsStore")],
 
   getInitialState: function () {
-    return { 
-      accounts : [] 
-    };
+    return { };
   },
 
   getStateFromFlux: function () {
@@ -28,18 +26,6 @@ var CmplxAccounts = React.createClass({
       accounts: flux.store("AccountsStore").getState()
     };
   },
-
-  //getInitialState: function () {
-  //  var flux = this.getFlux();
-  //  return { 
-  //    accounts : [
-  //        {"account_type":"savings", "account_number":1, "balance":100},
-  //        {"account_type":"checking", "account_number":2, "balance":2000},
-  //        {"account_type":"checking", "account_number":3, "balance":59}]  
-
-  //  }
-  //},
-                   
 
   render:function() {
     var greyText = {
@@ -95,12 +81,6 @@ var CmplxAccounts = React.createClass({
         <Footer />
       </div>
     );
-  },
-
-  accountHistory(e, id) {
-    e.preventDefault();
-    console.log(id);
-    //this.getFlux().dispatcher({type: Const.ACCOUNT_HISTORY, payload: {accountNumber: this.accountNumber}});
   }
 
 });

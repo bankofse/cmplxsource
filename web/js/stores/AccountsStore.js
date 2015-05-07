@@ -45,8 +45,7 @@ var AccountsStore = Fluxxor.createStore({
       .then(function (response) {
         switch(response.status.code) {
           case 200:
-            console.log(response.entity);
-            this.accounts = JSON.parse(response.entity).accounts;
+            this.mon_accts = JSON.parse(response.entity).accounts;
             this.emit("change");
             break;
 
@@ -58,16 +57,9 @@ var AccountsStore = Fluxxor.createStore({
         console.log("ERROR", err);
       });
     },
-    
-    //getAccounts: function(){
-    //    //get all accounts for a certain user
-    //    var sample = {"account_type":savings, "account_number":1, "balance":100, "user_id" : 1, "account_number":1, card_number:null};
-    //    return sample;
-    //},
 
     getState: function() {
-      console.log("AccountsStore.getState()");
-      return this.accounts;
+      return this.mon_accts;
     }
 });
 
