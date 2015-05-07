@@ -45,15 +45,13 @@ var UserStore  = Fluxxor.createStore({
     });
 
     this.client({
-      path: "/user/"
+      path: "/account",
+      method: "GET"
     })
     .then(function (response) {
       switch(response.status.code) {
-
         case 200:
           this.loggedin = true;
-          console.log("Logged In");
-          this.userinfo = JSON.parse(response.entity);
           this.emit("change");
           break;
 
