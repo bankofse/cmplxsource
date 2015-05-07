@@ -14,41 +14,38 @@ var React = require('react/addons'),
 
 var CmplxAccounts = React.createClass({
 
-    mixins: [FluxMixin],
+  mixins: [FluxMixin],
 
  
 
-    getInitialState: function () {
-        var flux = this.getFlux();
-        return { 
-            accounts : [
-                {"account_type":"savings", "account_number":1, "balance":100},
-                {"account_type":"checking", "account_number":2, "balance":2000},
-                {"account_type":"checking", "account_number":3, "balance":59}]  
+  getInitialState: function () {
+    var flux = this.getFlux();
+    return { 
+      accounts : [
+          {"account_type":"savings", "account_number":1, "balance":100},
+          {"account_type":"checking", "account_number":2, "balance":2000},
+          {"account_type":"checking", "account_number":3, "balance":59}]  
 
-        }
-    },
+    }
+  },
 
                    
 
-    render:function() {
-        var greyText = {
-            color:'#575757',
-            marginTop:0
-        };
-        var headerText = {
-            color:'#575757'
-        };
-        var valueText = {
-            color:'#575757',
-            paddingLeft:75
-        };
+render:function() {
+      var greyText = {
+        color:'#575757',
+        marginTop:0
+      };
+      var valueText = {
+        color:'#575757',
+        paddingLeft:75
+      };
       
-        var accountsArray = this.state.accounts.map(function (e, i) {
-            return (
-               <tr key={i}>
-                  <td style={valueText}>{e.account_type}</td>
-                    <td style={valueText}>{e.account_number}</td>
+      var accountsArray = this.state.accounts.map(function (e, i) {
+           return (
+              <tr key={i}>
+                <td style={valueText}>{e.account_type}</td>
+                <td style={valueText}>{e.account_number}</td>
                 <td style={valueText}>{e.balance}</td>
                 <td style={valueText}>
                   <Link to="/account/:id" params={{id:e.account_number}}>
@@ -57,44 +54,45 @@ var CmplxAccounts = React.createClass({
                 </td>
               </tr>
             );
-});
+       });
       
-return (
+    return (
  
-  <div className="chatapp">
-    <NavigationBar />
-    <div className="pure-g">
-    <h1 style={headerText}>Accounts</h1>
-          <div className="pure-u-md-3-4 padded-content"></div>
-          <div className="pure-u-md-1-4 pure-u-sm-1 padded-content">   
-          </div>
-          <div className="pure-u-md-1-4 padded-content"></div>
-          <div className="pure-u-md-3-4 pure-u-sm-1 padded-content">
-            <table className="pure-table">
-              <thead>
-                <tr>
-                  <td><h4 style={greyText}>Account Type</h4></td>
-                  <td><h4 style={greyText}>Account Number</h4></td>
-                  <td><h4 style={greyText}>Balance</h4></td>
-                  <td><h4 style={greyText}>Transactions</h4></td>  
-                </tr>
-              </thead>
-              <tbody>
-                {accountsArray}
-              </tbody>
-            </table>
-        </div>
+      <div className="chatapp">
+        <NavigationBar />
+            <div className="padded-content">
+              <div className="pure-u-md-3-4 padded-content">
+                                                      <h1 style={greyText}>Accounts</h1>
+</div>
+              <div className="pure-u-md-1-4 pure-u-sm-1 padded-content"> 
+              </div>
+              <div className="pure-u-md-1-4 padded-content"></div>
+              <div className="pure-u-md-3-4 pure-u-sm-1 padded-content">
+                <table className="pure-table">
+                  <thead>
+                    <tr>
+                      <td><h4 style={greyText}>Account Type</h4></td>
+                      <td><h4 style={greyText}>Account Number</h4></td>
+                      <td><h4 style={greyText}>Balance</h4></td>
+                      <td><h4 style={greyText}>Transactions</h4></td>  
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {accountsArray}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+        <Footer />
       </div>
-    <Footer />
-  </div>
     );
-},
+  },
 
-accountHistory(e, id) {
+  accountHistory(e, id) {
     e.preventDefault();
     console.log(id);
     //this.getFlux().dispatcher({type: Const.ACCOUNT_HISTORY, payload: {accountNumber: this.accountNumber}});
-}
+  }
 
 });
 
