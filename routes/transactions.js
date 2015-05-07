@@ -1,7 +1,7 @@
 "use strict";
 
 var express = require('express'),
-  debug = require('debug')('transaction'),
+  debug = require('debug')('cmplxsource:transaction'),
   rp = require('request-promise'),
   disque = require('disque.js'),
   redis = require('redis'),
@@ -77,6 +77,7 @@ function completeTransaction(payload) {
     .then(() => debug('Completed'))
     .catch(() => debug('Failed'));
 }
+
 
 /*
  * Handle Requests
