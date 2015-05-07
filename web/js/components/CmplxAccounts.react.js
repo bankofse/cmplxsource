@@ -14,50 +14,45 @@ var React = require('react/addons'),
 
 var CmplxAccounts = React.createClass({
 
-  mixins: [FluxMixin],
-
- 
+  mixins: [FluxMixin, StoreWatchMixin("AccountsStore")],
 
   getInitialState: function () {
-    var flux = this.getFlux();
-    return { 
-      accounts : [
-          {"account_type":"savings", "account_number":1, "balance":100},
-          {"account_type":"checking", "account_number":2, "balance":2000},
-          {"account_type":"checking", "account_number":3, "balance":59}]  
-
-    }
+    return { };
   },
 
-                   
+  getStateFromFlux: function () {
+    var flux = this.getFlux();
+    return {
+      accounts: flux.store("AccountsStore").getState()
+    };
+  },
 
-render:function() {
-      var greyText = {
-        color:'#575757',
-        marginTop:0
-      };
-      var valueText = {
-        color:'#575757',
-        paddingLeft:75
-      };
-      
-      var accountsArray = this.state.accounts.map(function (e, i) {
-           return (
-              <tr key={i}>
-                <td style={valueText}>{e.account_type}</td>
-                <td style={valueText}>{e.account_number}</td>
-                <td style={valueText}>{e.balance}</td>
-                <td style={valueText}>
-                  <Link to="/account/:id" params={{id:e.account_number}}>
-                    <input type="button" className="button-secondary pure-button" value="Transactions" />
-                  </Link>
-                </td>
-              </tr>
-            );
-       });
-      
+  render:function() {
+    var greyText = {
+      color:'#575757',
+      marginTop:0
+    };
+    var valueText = {
+      color:'#575757',
+      paddingLeft:75
+    };
+
+    var accountsArray = this.state.accounts.map(function (e, i) {
+         return (
+            <tr key={i}>
+              <td style={valueText}>Checking</td>
+              <td style={valueText}>{e.account_number}</td>
+              <td style={valueText}>{e.amount}</td>
+              <td style={valueText}>
+                <Link to="/account/:id" params={{id:e.account_number}}>
+                  <input type="button" className="button-secondary pure-button" value="Transactions" />
+                </Link>
+              </td>
+            </tr>
+          );
+    });
+    
     return (
- 
       <div className="chatapp">
         <NavigationBar />
             <div className="padded-content">
@@ -86,12 +81,6 @@ render:function() {
         <Footer />
       </div>
     );
-  },
-
-  accountHistory(e, id) {
-    e.preventDefault();
-    console.log(id);
-    //this.getFlux().dispatcher({type: Const.ACCOUNT_HISTORY, payload: {accountNumber: this.accountNumber}});
   }
 
 });
