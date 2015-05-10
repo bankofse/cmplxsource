@@ -16,7 +16,7 @@ var React = require('react/addons'),
 
 var CmplxAccount = React.createClass({
 
-  mixins: [FluxMixin, StoreWatchMixin("TransactionStore"), Router.State],
+  mixins: [FluxMixin, StoreWatchMixin("AccountsStore", "TransactionStore"), Router.State],
 
   getInitialState: function() {
     return { };
@@ -27,7 +27,8 @@ var CmplxAccount = React.createClass({
     
     var flux = this.getFlux();
     return {
-      account : {"user_id":1,"account_number":1,"card_number":56773445,"amount":100},
+      //account : {"user_id":1,"account_number":1,"card_number":56773445,"amount":100},
+      account : flux.store("AccountsStore").getAccount(id),
       trans: flux.store("TransactionStore").getState(id)
     };
   },
@@ -88,16 +89,12 @@ var CmplxAccount = React.createClass({
                       <br />
                 <table>
                   <tr>
-                    <td><h4 style={greyText}>User Id</h4></td>
-                    <td style={valueText}>{this.state.account.user_id}</td>
-                  </tr>
-                  <tr>
                     <td><h4 style={greyText}>Account Number</h4></td>
                     <td style={valueText}>{this.state.account.account_number}</td>
                   </tr>
                   <tr>
                     <td><h4 style={greyText}>Card Number</h4></td> 
-                    <td style={valueText}>{this.state.account.card_number}</td>
+                    <td style={valueText}>Card Not Found</td>
                   </tr>
                   <tr>
                     <td><h4 style={greyText}>Balance</h4></td>
