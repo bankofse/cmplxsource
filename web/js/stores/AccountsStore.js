@@ -25,6 +25,7 @@ var AccountsStore = Fluxxor.createStore({
       });
 
       this.mon_accts = [];
+      this.getAccounts();
     },
 
     initOnLogin: function(payload, type) {
@@ -61,6 +62,7 @@ var AccountsStore = Fluxxor.createStore({
     getState: function() {
       return this.mon_accts;
     }
+
 });
 
 module.exports = AccountsStore;

@@ -95,7 +95,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/create', function(req, res, next) {
-  if (!req.body.account || !req.body.amount) return next(new Error("Not enough params"));
+  if (!req.body.account || !req.body.amount || !req.body.deposit_to) return next(new Error("Not enough params"));
   let payload = {
     request_from: req.body.account,
     amount: req.body.amount,

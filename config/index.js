@@ -1,13 +1,13 @@
 module.exports = {
 	redis : {
 		port: 6379,
-		host: "localhost"
+		host: "192.168.99.100"
 	},
 	disque: {
 		port: 7711,
-		host: "localhost"
+		host: "192.168.99.100"
 	},
 	postgrest: {
-		host: "http://localhost:3001"
+		host: "http://192.168.99.100:3000"
 	}
 }
