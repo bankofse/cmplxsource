@@ -19,8 +19,7 @@ window.onhashchange = function(e) {
 module.exports = {
 
   changeCurreny(value) {
-    console.log("Changing Currency")
-    this.dispatch("changeCurreny", value);
+    this.dispatch(consts.CURRENCY_CHANGE, value);
   },
 
   login(user, pass) {

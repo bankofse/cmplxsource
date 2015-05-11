@@ -1,7 +1,7 @@
 #!/bin/bash
 
-HOST="cmplx.in";
-DB="http://cmplx.in:3001";
+HOST="localhost:3000";
+DB="http://192.168.99.100:3001";
 echo "Creating User Accounts";
 
 NUMUSERS=$(cat ./data.json | jsawk 'return this.accounts.length - 1');

@@ -16,7 +16,7 @@ var AccountsStore = Fluxxor.createStore({
       this.bindActions(
         consts.LOGIN_USER_COMPLETE, this.initOnLogin,
         consts.HASH_CHANGE, this.getAccounts,
-        "changeCurreny", this.changeCurrency
+        consts.CURRENCY_CHANGE, this.changeCurrency
       );        
 
       this.client = rest.wrap(defaultRequest, {
@@ -42,8 +42,9 @@ var AccountsStore = Fluxxor.createStore({
     },
 
     changeCurrency: function(value) {
+      console.log("Changed to " + value);
       this.currency = value;
-      this.emit("change");
+      this.getAccounts();
     },
 
     getAccounts: function() {

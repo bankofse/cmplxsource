@@ -4,5 +4,6 @@ module.exports = {
   LOGOUT_USER : "LOGOUT_USER",
   LOGIN_URL : "cmplx.in/auth",
   SIGNUP_URL : "complx.in/auth/create",
-  HASH_CHANGE : "hashchangeevent"
+  HASH_CHANGE : "hashchangeevent",
+  CURRENCY_CHANGE: "CURRENCY_CHANGE"
 }
