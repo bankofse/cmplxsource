@@ -9,7 +9,8 @@ var React = require('react/addons'),
     Router = require('react-router'),
     Link = Router.Link,
     Route = Router.Route,
-    RouteHandler = Router.RouteHandler
+    RouteHandler = Router.RouteHandler,
+    codes = require('../../codes.json')
 ;
 
 var CmplxAccounts = React.createClass({
@@ -23,8 +24,13 @@ var CmplxAccounts = React.createClass({
   getStateFromFlux: function () {
     var flux = this.getFlux();
     return {
-      accounts: flux.store("AccountsStore").getState()
+      accounts: flux.store("AccountsStore").getState(),
+      currency: flux.store("AccountsStore").getCurrency()
     };
+  },
+
+  onChange (e) {
+    this.getFlux().actions.changeCurreny(e.target.value);
   },
 
   render:function() {
@@ -51,17 +57,28 @@ var CmplxAccounts = React.createClass({
             </tr>
           );
     });
-    
+
+    var currencies = codes.map(function (a, i) {
+        return (<option value={a} key={i} >{a}</option>)
+    });
+
     return (
       <div className="chatapp">
         <NavigationBar />
             <div className="padded-content">
               <div className="pure-u-md-3-4 padded-content">
-                                                      <h1 style={greyText}>Accounts</h1>
-</div>
+                <h1 style={greyText}>Accounts ({this.state.currency})</h1>
+              </div>
               <div className="pure-u-md-1-4 pure-u-sm-1 padded-content"> 
               </div>
-              <div className="pure-u-md-1-4 padded-content"></div>
+              <div className="pure-u-md-1-4 pure-u-sm-1 padded-content">
+                <div>
+                  Select Currency
+                </div>
+                <select defaultValue={this.state.currency} onChange={this.onChange}>
+                    {currencies}
+                </select>
+              </div>
               <div className="pure-u-md-3-4 pure-u-sm-1 padded-content">
                 <table className="pure-table">
                   <thead>

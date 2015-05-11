@@ -11,10 +11,12 @@ var Fluxxor = require('fluxxor'),
 const AUTHKEY = "auth-token";
 
 var AccountsStore = Fluxxor.createStore({
+
     initialize: function() {
       this.bindActions(
         consts.LOGIN_USER_COMPLETE, this.initOnLogin,
-        consts.HASH_CHANGE, this.getAccounts 
+        consts.HASH_CHANGE, this.getAccounts,
+        "changeCurreny", this.changeCurrency
       );        
 
       this.client = rest.wrap(defaultRequest, {
@@ -23,7 +25,7 @@ var AccountsStore = Fluxxor.createStore({
           token: localStorage.getItem(AUTHKEY)
         }
       });
-
+      this.currency = "USD"
       this.mon_accts = [];
       this.getAccounts();
     },
@@ -39,9 +41,18 @@ var AccountsStore = Fluxxor.createStore({
       });
     },
 
+    changeCurrency: function(value) {
+      this.currency = value;
+      this.emit("change");
+    },
+
     getAccounts: function() {
+      var path = "/account";
+      if (this.currency != "USD") {
+        path = path + "?currency=" + this.currency;
+      }
       this.client({
-        path: "/account"
+        path: path
       })
       .then(function (response) {
         switch(response.status.code) {
@@ -61,6 +72,10 @@ var AccountsStore = Fluxxor.createStore({
 
     getState: function() {
       return this.mon_accts;
+    },
+
+    getCurrency: function () {
+      return this.currency;
     },
 
     getAccount: function(acct_num) {
